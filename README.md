@@ -20,7 +20,7 @@ The following language features are currently transpiled, but some edge cases mi
 * String interpolation
 * Main function calling (in swift playground)
 * Custom rewrites (comment the preceding line with `// SWIFT: this.will(be.replaced)` to replace the following line)
-* Null safety
+* Basic null safety
 * Basic try-catch
 * Casting
 * Ranges and Iteration
@@ -31,6 +31,21 @@ The following language features are currently transpiled, but some edge cases mi
 * Generics
 * Extension functions
 * Companion objects / static class properties
+
+### Unsupported features ###
+
+The following features are currently unsupported, but are ordered by likelihood to be implemented soon:
+
+* Computed properties
+* Visibility modifiers
+* Force optional unwrapping
+* Lambdas / Closures
+* Maps / Dictionaries and Sets
+* Enums
+* (Data) classes with opening & closing brackets in same line or without brackets at all
+* Line-wrapped function and class definitions
+* Unnamed constructor parameter
+* ...
 
 ### Dependencies ###
 
