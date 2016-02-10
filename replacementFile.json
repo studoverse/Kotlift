@@ -1,0 +1,11 @@
+[
+  // START - DO NOT MODIFY THIS SECTION
+  {"from":"val ", "to":"let "},
+  {"from":"null", "to":"nil"},
+  {"from":"this.", "to":"self."},
+  {"from":".toString()", "to":""},
+  {"from":"Boolean", "to":"Bool"},
+  {"from":"println(", "to":"print("},
+  {"from":"print()", "to":"print(\"\")"}
+  // END - DO NOT MODIFY THIS SECTION
+]
