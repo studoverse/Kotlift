@@ -21,7 +21,7 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
     var simulatedNextSourceLine: String? = null
 
     var i = -1;
-    while (i < source.size - 1) {
+    lineLoop@ while (i < source.size - 1) {
       // Either get next line from source or from simulatedNextSourceLine
       var line =
           if (simulatedNextSourceLine == null) {
@@ -85,6 +85,9 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
             Function()
           } else if (line.matches(Regex("(\\s*)(open |data |)class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"))) {
             Class()
+          } else if (line.matches(Regex("(\\s*)companion object \\{"))) {
+            structureTree.add(CompanionObject())
+            continue
           } else {
             Block()
           }
@@ -97,9 +100,16 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
           nextStructureTreeElement = Block()
         } else if (c == '}') {
           val lastElement = structureTree.last()
+
+          // Apply nextConstructor even when no init{} section was given in kotlin
           if (lastElement is Class && lastElement.constructorWritten == false && nextConstructor != "") {
-            // Apply nextConstructor even when no init{} section was given in kotlin
             dest.add("  init$nextConstructor {$nextInitBlockLine\n  }")
+          }
+
+          // Ignore closing brackets from companion objects
+          if (lastElement is CompanionObject ) {
+            structureTree.removeAt(structureTree.lastIndex)
+            continue@lineLoop
           }
 
           structureTree.removeAt(structureTree.lastIndex)
@@ -274,7 +284,7 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
       }
 
 
-      // Extension Functions
+      // Extension functions
       if (line.matches(Regex("(\\s*)func List(<.*>|)\\.(.*)"))) {
         // List -> Array
 
@@ -298,6 +308,12 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
 
         // Close extension
         structureTree.add(structureTree.size - 1, AddLine("}"))
+      }
+
+
+      // Companion object / static
+      if (line.matches(Regex("(\\s*)(func|var|let) (.*)")) && !structureTree.none { it is CompanionObject }) {
+        line = line.replace(Regex("(\\s*)(func|var|let) (.*)"), "$1static $2 $3")
       }
 
 
@@ -329,7 +345,7 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
 
     val parameterNames = ArrayList<String>()
 
-    // Costructor parameters
+    // Constructor parameters
     for (parameter in parameters) {
       if (parameter.startsWith("let ") || parameter.startsWith("var ")) {
         // Create field in class
@@ -369,3 +385,4 @@ class Class(var constructorWritten: Boolean = false, var derivedClass: Boolean =
 class Function : StructureTree()
 class Block : StructureTree()
 class AddLine(val lineToInsert: String) : StructureTree()
+class CompanionObject : StructureTree()
