@@ -2,9 +2,20 @@
   // START - DO NOT MODIFY THIS SECTION
   {"from":"val ", "to":"let "},
   {"from":"null", "to":"nil"},
-  {"from":"this.", "to":"self."},
+  {"from":"this", "to":"self"},
   {"from":".toString()", "to":""},
   {"from":"Boolean", "to":"Bool"},
+  {"from":"Float", "to":"Double"},
+  {"from":"0f", "to":"0"},
+  {"from":"1f", "to":"1"},
+  {"from":"2f", "to":"2"},
+  {"from":"3f", "to":"3"},
+  {"from":"4f", "to":"4"},
+  {"from":"5f", "to":"5"},
+  {"from":"6f", "to":"6"},
+  {"from":"7f", "to":"7"},
+  {"from":"8f", "to":"8"},
+  {"from":"9f", "to":"9"},
   {"from":"println(", "to":"print("},
   {"from":"print()", "to":"print(\"\")"}
   // END - DO NOT MODIFY THIS SECTION

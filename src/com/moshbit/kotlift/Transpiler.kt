@@ -102,7 +102,13 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
             dest.add("  init$nextConstructor {$nextInitBlockLine\n  }")
           }
 
-          structureTree.removeAt(structureTree.count() - 1)
+          structureTree.removeAt(structureTree.lastIndex)
+
+          // Add line if noted in structure tree
+          if (structureTree.isNotEmpty() && structureTree.last() is AddLine) {
+            dest.add((structureTree.last() as AddLine).lineToInsert)
+            structureTree.removeAt(structureTree.lastIndex)
+          }
         }
       }
 
@@ -157,13 +163,13 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
       }
 
 
-      // Replacments
+      // Replacements
       replacements.forEach { line = line.replace(it.from, it.to) }
 
 
       // Remove package
-      if (line.startsWith("package ")) {
-        line = ""
+      if (line.startsWith("package ") || line.startsWith("import ")) {
+        continue
       }
 
 
@@ -198,6 +204,14 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
       // Translate arrayListOf -> []
       if (line.matches(Regex("(.*)arrayListOf<(.*)>(.*)"))) {
         line = line.replace(Regex("(.*)arrayListOf<(.*)>(.*)"), "$1[$2]$3")
+      }
+
+      // Translate ArrayList and LinkedList --> []
+      if (line.matches(Regex("(.*)LinkedList<(.*)>(.*)"))) {
+        line = line.replace(Regex("(.*)LinkedList<(.*)>(.*)"), "$1[$2]$3")
+      }
+      if (line.matches(Regex("(.*)ArrayList<(.*)>(.*)"))) {
+        line = line.replace(Regex("(.*)ArrayList<(.*)>(.*)"), "$1[$2]$3")
       }
 
 
@@ -251,6 +265,39 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
       // Named arguments: name = x --> name: x
       while (line.matches(Regex("(.*[A-Z][A-Za-z0-9_]*)(<.*>|)\\((.*?)([A-Za-z0-9_]+) = (.*)\\)(.*)"))) {
         line = line.replace(Regex("(.*[A-Z][A-Za-z0-9_]*)(<.*>|)\\((.*?)([A-Za-z0-9_]+) = (.*)\\)(.*)"), "$1$2($3$4: $5)$6")
+      }
+
+
+      // Arrays should be always mutable, as mutation of elements changes array (in contrast to Kotlin lists)
+      if (line.matches(Regex("(\\s*)let (.* = \\[.*\\]\\(\\))"))) {
+        line = line.replace((Regex("(\\s*)let (.* = \\[.*\\]\\(\\))")), "$1var $2")
+      }
+
+
+      // Extension Functions
+      if (line.matches(Regex("(\\s*)func List(<.*>|)\\.(.*)"))) {
+        // List -> Array
+
+        // Int and Double can not be extended when used in an array, so use Addable protocol
+        var listType = line.replace(Regex("(\\s*)func List(<.*>|)\\.(.*)"), "$2")
+        if (listType == "<Int>" || listType == "<Double>") {
+          listType = "Addable"
+        }
+        listType = listType.replace("<", "").replace(">", "")
+
+        line = line.replace(Regex("(\\s*)func List(<.*>|)\\.(.*)"), "extension Array where Element : $listType {\n") +
+            line.replace(Regex("(\\s*)func ([A-Za-z0-9_]+)(<.*>|)\\.(.*)"), "$1func $4")
+
+        // Close extension
+        structureTree.add(structureTree.size - 1, AddLine("}"))
+
+      } else if (line.matches(Regex("(\\s*)func ([A-Za-z0-9_]+)(<.*>|)\\.(.*)"))) {
+        // All others
+        line = line.replace(Regex("(\\s*)func ([A-Za-z0-9_]+)(<.*>|)\\.(.*)"), "extension $1$2$3 {\n") +
+            line.replace(Regex("(\\s*)func ([A-Za-z0-9_]+)(<.*>|)\\.(.*)"), "$1func $4")
+
+        // Close extension
+        structureTree.add(structureTree.size - 1, AddLine("}"))
       }
 
 
@@ -310,7 +357,7 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
       nextLine += parameterNames.joinToString(
           prefix = "\n  var description: String {\n    return \"$dataClassName(",
           postfix = ")\"\n  }\n",
-          transform = { "$it=\\($it)" } )
+          transform = { "$it=\\($it)" })
     }
   }
 
@@ -321,3 +368,4 @@ open class StructureTree
 class Class(var constructorWritten: Boolean = false, var derivedClass: Boolean = false) : StructureTree()
 class Function : StructureTree()
 class Block : StructureTree()
+class AddLine(val lineToInsert: String) : StructureTree()

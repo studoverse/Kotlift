@@ -27,3 +27,15 @@ class System {
     return (Int64) (NSDate().timeIntervalSince1970 * 100.0)
   }
 }
+
+func / (lhs: Double, rhs: Int) -> Double {
+  return Double(lhs) / Double(rhs)
+}
+
+func / (lhs: Int, rhs: Double) -> Double {
+  return Double(lhs) / Double(rhs)
+}
+
+protocol Addable {}
+extension Int: Addable {}
+extension Double: Addable {}

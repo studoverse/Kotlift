@@ -3,7 +3,6 @@
  * See http://kotlinlang.org/docs/reference/null-safety.html#null-safety
  */
 
-
 // Return nil if str does not hold a number
 func parseInt(str: String) -> Int? {
   do {

@@ -1,5 +1,5 @@
 class Box<T> {
-  var value: T // value = t won't work, as this must happen in swift inside constructor
+  var value: T // value = t won't work, as self must happen in swift inside constructor
 
   func doNothing(value2: T) -> T {
     return value

@@ -12,7 +12,7 @@ Supported versions: Kotlin 1.0.0-rc-1036, Swift 2.1
 
 The following language features are currently transpiled, but some edge cases might produce invalid Swift code.
 
-* Variables and arrays
+* Variables, arrays and lists
 * Functions with parameters
 * For and while loops
 * String interpolation
@@ -27,6 +27,7 @@ The following language features are currently transpiled, but some edge cases mi
 * Inheritance
 * Data classes (constructor and description will be generated)
 * Generics
+* Extension functions
 
 ### Dependencies ###
 
