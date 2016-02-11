@@ -4,7 +4,7 @@ Kotlift is the first source-to-source language transpiler from Kotlin to Swift.
 
 It is not intended to support the full Kotlin or Swift language, but most of the generated Swift code will be valid. Neither functions from the Kotlin stdlib are support, nor framework interfacing code from Android or iOS/Cocoa.
 
-Kotlift uses lots of regular expressions and and a simple structure tree.
+Kotlift uses lots of regular expressions and a simple structure tree.
 
 To use Kotlift for your own project, a file called replacementFile.json can be edited to customize replacements (like `.toString() `to `.mySwiftyToStringFunction()`).
 
