@@ -47,6 +47,17 @@ The following features are currently unsupported, but are ordered by likelihood 
 * Unnamed constructor parameter
 * ...
 
+### Usage ###
+
+The repository contains an IntelliJ project. Usage of precompiled jar:
+
+`java -jar moshbit.kotlift.jar test-src dest replacementFile.json test-dest`
+
+1. parameter: folder of Kotlin source files. (mandatory)
+2. parameter: destination folder where Swift code should be written to. (mandatory)
+3. parameter: replacement file, used for standard language replacements and may be customized. (mandatory)
+4. parameter: Swift testcase folder. If given, all files in the destination folder are compared to the files in this folder. (optional)
+
 ### Dependencies ###
 
 * Kotlin 1.0.0-rc-1036

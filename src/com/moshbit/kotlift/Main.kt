@@ -16,6 +16,7 @@ fun main(args: Array<String>) {
     println("Usage: kotlift src/kotlin dest/swift replacementFile.json")
     println("or:    kotlift src/kotlin dest/swift replacementFile.json dest/test/swift")
     println("calling with a test path validates all files")
+    return;
   }
 
   val sourcePath = args[0];
