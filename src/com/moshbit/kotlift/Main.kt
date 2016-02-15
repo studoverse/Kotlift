@@ -1,8 +1,5 @@
 package com.moshbit.kotlift
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -23,10 +20,7 @@ fun main(args: Array<String>) {
   val destinationPath = args[1];
 
   // Replacement array
-  val mapper = jacksonObjectMapper()
-  mapper.enable(JsonParser.Feature.ALLOW_COMMENTS)
-  val replacements: List<Replacement> = mapper.readValue(Paths.get(args[2]).toFile())
-  println(replacements)
+  val replacements: List<Replacement> = loadReplacementList((Paths.get(args[2]).toFile()))
 
   val sourceFiles = ArrayList<File>()
   val destinationFiles = ArrayList<File>()
@@ -86,6 +80,25 @@ fun main(args: Array<String>) {
       println("$errorCount ERRORS")
     }
   }
+}
+
+// A very simple json parser. Could also be implemented with jackson json parser, but omitted to reduce dependencies.
+fun loadReplacementList(file: File): List<Replacement> {
+  val lines = Files.readAllLines(Paths.get(file.path), Charsets.UTF_8)
+  val list = LinkedList<Replacement>()
+
+  val replacementRegex = Regex("\\s*\\{\\\"from\\\":\\\"(.*)\\\", \\\"to\\\":\\\"(.*)\\\"\\}.*")
+
+  // Simple son parser
+  for (line in lines) {
+    if (line.matches(replacementRegex)) {
+      list.add(Replacement(line.replace(replacementRegex, "$1").replace("\\\"", "\""),
+          line.replace(replacementRegex, "$2").replace("\\\"", "\"")))
+    }
+  }
+
+  println("Replacements: $list")
+  return list
 }
 
 fun validateError(fileName: String, hint: String) {

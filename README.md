@@ -8,7 +8,7 @@ Kotlift uses lots of regular expressions and a simple structure tree.
 
 To use Kotlift for your own project, a file called replacementFile.json can be edited to customize replacements (like `.toString() `to `.mySwiftyToStringFunction()`).
 
-Supported versions: Kotlin 1.0.0-rc-1036, Swift 2.1
+Supported versions: Kotlin 1.0.0, Swift 2.1
 
 ### Supported features ###
 
@@ -60,8 +60,7 @@ The repository contains an IntelliJ project. Usage of precompiled jar:
 
 ### Dependencies ###
 
-* Kotlin 1.0.0-rc-1036
-* Jackson jackson-module-kotlin:2.7.1
+* Kotlin 1.0.0
 
 ### Contribution guidelines ###
 
