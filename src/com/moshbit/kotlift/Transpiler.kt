@@ -20,7 +20,7 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
     var nextConstructor: String? = null
     var simulatedNextSourceLine: String? = null
 
-    var i = -1;
+    var i = -1
     lineLoop@ while (i < source.size - 1) {
       // Either get next line from source or from simulatedNextSourceLine
       var line =
@@ -73,7 +73,7 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
 
 
       // Make sure all classes end with {}
-      if (line.matches(Regex("\\s*(open |data |)class .*")) && !line.endsWith("{")) {
+      if (line.matches(Regex("\\s*(open |data |abstract |)*class .*")) && !line.endsWith("{")) {
         line += " {"
         simulatedNextSourceLine = "}"
       }
@@ -81,9 +81,9 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
 
       // Build structure tree
       var nextStructureTreeElement =
-          if (line.matches(Regex("\\s*(open |override |)fun .*"))) {
+          if (line.matches(Regex("\\s*(open |override |abstract |)*fun .*"))) {
             Function()
-          } else if (line.matches(Regex("(\\s*)(open |data |)class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"))) {
+          } else if (line.matches(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"))) {
             Class()
           } else if (line.matches(Regex("(\\s*)companion object \\{"))) {
             structureTree.add(CompanionObject())
@@ -103,7 +103,8 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
 
           // Apply nextConstructor even when no init{} section was given in kotlin
           if (lastElement is Class && lastElement.constructorWritten == false && nextConstructor != "") {
-            dest.add("  init$nextConstructor {$nextInitBlockLine\n  }")
+            val prefix = if (lastElement.derivedClass) "override " else ""
+            dest.add("  $prefix$nextConstructor {$nextInitBlockLine\n  }")
           }
 
           // Ignore closing brackets from companion objects
@@ -150,12 +151,17 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
 
 
       // Translate function calls
-      if (line.matches(Regex("\\s*(open |override |)fun .*"))) {
+      if (line.matches(Regex("\\s*(open |override |abstract |)*fun .*"))) {
         // fun -> func
-        line = line.replace("open fun ", "func ").replace("fun ", "func ")
+        line = line.replace("open ", "").replace("fun ", "func ")
         // Return values
         line = line.replace("):", ") ->")
         line = line.replace(") :", ") ->")
+
+        // Abstract
+        if (line.contains("abstract ")) {
+          line = line.replace("abstract ", "") + " {\n    fatalError(\"Method is abstract\")\n  }"
+        }
       }
 
 
@@ -227,21 +233,21 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
 
       // Classes
       // Declaration
-      if (line.matches(Regex("(\\s*)(open |data |)class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"))) {
-        nextConstructor = line.replace(Regex("(\\s*)(open |data |)class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$5")
+      if (line.matches(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"))) {
+        nextConstructor = line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "init$5")
 
         // Data classes
         val dataClassName =
             if (line.trim().startsWith("data")) {
               line = line.substring(0, line.length - 2) + ": CustomStringConvertible {"
-              line.replace(Regex("(\\s*)(open |data |)class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$3")
+              line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$3")
             } else {
               null
             }
 
         // Constructor parameters
-        if (nextConstructor.isEmpty()) {
-          nextConstructor = "()"
+        if (!nextConstructor.contains("(")) {
+          nextConstructor = "init()"
         } else {
           parseConstructorParams(nextConstructor, dataClassName)
           nextConstructor = nextConstructor.replace("let ", "").replace("var ", "")
@@ -249,22 +255,22 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
 
 
         // Inheritance
-        val derivedClass = line.replace(Regex("(\\s*)(open |data |)class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$7").replace("()", "")
-        line = line.replace(Regex("(\\s*)(open |data |)class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$1class $3$4$derivedClass {")
+        val derivedClass = line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$7")
+        line = line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$1class $3$4${derivedClass.replace("()", "")} {")
 
 
-        if (!derivedClass.isEmpty()) {
-          // Current class is a derived class
+        if (derivedClass.contains("(")) {
+          // Current class is a derived class, as it inherits also from a class and not only from a protocol
           (structureTree.last { it is Class } as Class).derivedClass = true
         }
 
       }
       // Constructor
-      if (line.matches(Regex("(\\s*)init \\{")) || line.matches(Regex("(\\s*)init \\{.*}"))) {
+      if (line.matches(Regex("(\\s*)(override |)init \\{")) || line.matches(Regex("(\\s*)(override |)init \\{.*}"))) {
         // TODO @V Decide if all arguments must be labeled or should be unlabeled (external name = "_")
         val prefix = if ((structureTree.last { it is Class } as Class).derivedClass) "override " else ""
 
-        line = line.replace(Regex("(\\s*)init \\{"), "$1${prefix}init$nextConstructor {$nextInitBlockLine")
+        line = line.replace(Regex("(\\s*)(override |)init \\{"), "$1$prefix$nextConstructor {$nextInitBlockLine")
         nextConstructor = ""
 
         // Class constructor has been written

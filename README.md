@@ -27,6 +27,7 @@ The following language features are currently transpiled, but some edge cases mi
 * When / switch case
 * Classes with none or one constructor
 * Inheritance
+* Abstract classes
 * Data classes (constructor and description will be generated)
 * Generics
 * Extension functions

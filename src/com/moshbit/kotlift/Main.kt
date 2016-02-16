@@ -13,11 +13,11 @@ fun main(args: Array<String>) {
     println("Usage: kotlift src/kotlin dest/swift replacementFile.json")
     println("or:    kotlift src/kotlin dest/swift replacementFile.json dest/test/swift")
     println("calling with a test path validates all files")
-    return;
+    return
   }
 
-  val sourcePath = args[0];
-  val destinationPath = args[1];
+  val sourcePath = args[0]
+  val destinationPath = args[1]
 
   // Replacement array
   val replacements: List<Replacement> = loadReplacementList((Paths.get(args[2]).toFile()))
@@ -41,7 +41,7 @@ fun main(args: Array<String>) {
   // Validate
   if (args.count() == 4) {
     var errorCount = 0
-    val testDestinationPath = args[3];
+    val testDestinationPath = args[3]
 
     val testDestFiles = ArrayList<File>()
     listFiles(testDestinationPath, testDestFiles, ".swift")
@@ -50,7 +50,7 @@ fun main(args: Array<String>) {
       println("ERROR: INVALID TEST FOLDER:")
       println(destinationFiles)
       println(testDestFiles)
-      return;
+      return
     }
 
     // Validate each file
