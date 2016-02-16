@@ -20,7 +20,7 @@ func main(args: [String]) {
     let x = parseInt(args[0])
     let y = parseInt(args[1])
 
-    // We cannot say 'x * y' now because they may hold nils
+    // We cannot say 'x * y' now because they may hold nulls
     if x != nil && y != nil {
       print(x! * y!) // Now we can
     } else {

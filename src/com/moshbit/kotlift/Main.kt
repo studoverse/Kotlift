@@ -105,11 +105,11 @@ fun loadReplacementList(file: File): List<Replacement> {
 
   val replacementRegex = Regex("\\s*\\{\\\"from\\\":\\\"(.*)\\\", \\\"to\\\":\\\"(.*)\\\"\\}.*")
 
-  // Simple son parser
+  // Simple json parser
   for (line in lines) {
     if (line.matches(replacementRegex)) {
-      list.add(Replacement(line.replace(replacementRegex, "$1").replace("\\\"", "\""),
-          line.replace(replacementRegex, "$2").replace("\\\"", "\"")))
+      list.add(Replacement(line.replace(replacementRegex, "$1").replace("\\\"", "\"").replace("\\\\", "\\"),
+          line.replace(replacementRegex, "$2").replace("\\\\", "\\")))
     }
   }
 

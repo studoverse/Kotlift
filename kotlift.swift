@@ -1,3 +1,5 @@
+import Foundation
+
 extension Array {
   var size: Int { return self.count }
   mutating func add(element: Element) {

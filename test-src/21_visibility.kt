@@ -66,11 +66,11 @@ protected class Subclass : Outer() {
 class Unrelated(val o: Outer) {
   // o.a, o.b are not visible
   // o.c and o.d are visible (same module)
-  // Outer.Nested and Nested::e are not visible. In Swift they are visible, as there is no protected.
+  // Outer.Nested and Nested::e are not visible. In Swift they are visible, as there is no Protected.
 
   fun printAll() {
     // println(o.a)
-    // println(o.b) // This statement runs in Swift, as there is no protected.
+    // println(o.b) // This statement runs in Swift, as there is no Protected.
     print(o.c)
     print(o.d)
 
@@ -80,7 +80,7 @@ class Unrelated(val o: Outer) {
     println(nested.e)*/
 
     // print(o.o())
-    // print(o.p()) // This statement runs in Swift, as there is no protected.
+    // print(o.p()) // This statement runs in Swift, as there is no Protected.
     print(o.q())
     print(o.r())
     print(o.s())

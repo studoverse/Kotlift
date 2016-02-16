@@ -324,8 +324,21 @@ class Transpiler(val replacements: List<Replacement>) {
 
 
       // Replacements
-      replacements.forEach { line = line.replace(it.from, it.to) }
+      replacements.forEach {
+        val regex = Regex("(.*[^A-Za-z0-9_]|)${it.from}([^A-Za-z0-9_].*|\\Z)")
+        while (line.matches(regex)) {
+          line = line.replace(regex, "$1${it.to}$2")
+        }
+      }
 
+
+      // Remove .toString()
+      line = line.replace(".toString()", "")
+
+      // Float --> Double
+      while (line.matches(Regex("(.*[^A-Za-z0-9_])([0-9]+)(\\.[0-9]*)?f([^A-Za-z0-9_].*|\\Z)"))) {
+        line = line.replace(Regex("(.*[^A-Za-z0-9_])([0-9]+)(\\.[0-9]*)?f([^A-Za-z0-9_].*|\\Z)"), "$1$2$3$4")
+      }
 
       // Remove package
       if (line.startsWith("package ") || line.startsWith("import ")) {

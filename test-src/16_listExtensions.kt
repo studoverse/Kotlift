@@ -38,7 +38,7 @@ fun main(args: Array<String>) {
   list.add(3.1415f)
   val avg1 = list.avg()
   println("avg1 = $avg1 (should be 10.0)")
-    
+
   val list2 = LinkedList<Float>()
   list2.add(15.0f)
   list2.add(5.0f)

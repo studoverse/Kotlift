@@ -70,11 +70,11 @@ public class Unrelated {
 
   // o.a, o.b are not visible
   // o.c and o.d are visible (same module)
-  // Outer.Nested and Nested::e are not visible. In Swift they are visible, as there is no protected.
+  // Outer.Nested and Nested::e are not visible. In Swift they are visible, as there is no Protected.
 
   func printAll() {
     // print(o.a)
-    // print(o.b) // This statement runs in Swift, as there is no protected.
+    // print(o.b) // This statement runs in Swift, as there is no Protected.
     print(o.c)
     print(o.d)
 
@@ -84,7 +84,7 @@ public class Unrelated {
     println(nested.e)*/
 
     // print(o.o())
-    // print(o.p()) // This statement runs in Swift, as there is no protected.
+    // print(o.p()) // This statement runs in Swift, as there is no Protected.
     print(o.q())
     print(o.r())
     print(o.s())
