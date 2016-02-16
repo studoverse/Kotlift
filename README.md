@@ -34,12 +34,12 @@ The following language features are currently transpiled, but some edge cases mi
 * Extension functions
 * Companion objects / static class properties
 * Properties with getters and setters / backing fields / computed properties
+* Visibility modifiers
 
 ### Unsupported features ###
 
 The following features are currently unsupported, but are ordered by likelihood to be implemented soon:
 
-* Visibility modifiers
 * Force optional unwrapping
 * Lambdas / closures
 * Maps / dictionaries and sets
