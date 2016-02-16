@@ -139,17 +139,17 @@ class Transpiler(val replacements: List<Replacement>) {
 
 
       // Make sure all classes end with {}
-      if (line.matches(Regex("\\s*(open |data |abstract |)*class .*")) && !line.endsWith("{")) {
+      if (line.matches(Regex("(.* |)class .*")) && !line.endsWith("{")) {
         line += " {"
         simulatedNextSourceLine = "}"
       }
 
       // Build structure tree
       var nextStructureTreeElement =
-          if (line.matches(Regex("\\s*(open |override |abstract |)*fun ([A-Za-z0-9_<>.]+)\\(.*\\).*"))) {
+          if (line.matches(R_FUN)) {
             Function()
-          } else if (line.matches(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"))) {
-            val name = line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$3")
+          } else if (line.matches(R_CLASS)) {
+            val name = line.replace(R_CLASS, "$3")
 
             // Add to classes list
             if(classesList.find { it.name == name } == null) {
@@ -242,8 +242,8 @@ class Transpiler(val replacements: List<Replacement>) {
 
 
       // Translate function calls
-      if (line.matches(Regex("\\s*(open |override |abstract |)*fun ([A-Za-z0-9_<>.]+)\\(.*\\).*"))) {
-        val functionName = line.replace(Regex("\\s*(open |override |abstract |)*fun ([A-Za-z0-9_<>.]+)\\(.*\\).*"), "$2")
+      if (line.matches(R_FUN)) {
+        val functionName = line.replace(R_FUN, "$2")
 
         // Append to classes/interface list
         for (index in structureTree.count() - 1 downTo 0) {
@@ -377,14 +377,14 @@ class Transpiler(val replacements: List<Replacement>) {
 
       // Classes
       // Declaration
-      if (line.matches(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"))) {
-        nextConstructor = line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "init$5")
+      if (line.matches(R_CLASS)) {
+        nextConstructor = line.replace(R_CLASS, "init$5")
 
         // Data classes
         val dataClassName =
             if (line.trim().startsWith("data")) {
               line = line.substring(0, line.length - 2) + ": CustomStringConvertible {"
-              line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$3")
+              line.replace(R_CLASS, "$3")
             } else {
               null
             }
@@ -399,8 +399,8 @@ class Transpiler(val replacements: List<Replacement>) {
 
 
         // Inheritance
-        val derivedClasses = line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$7")
-        line = line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$1class $3$4${derivedClasses.replace("()", "")} {")
+        val derivedClasses = line.replace(R_CLASS, "$7")
+        line = line.replace(R_CLASS, "$1class $3$4${derivedClasses.replace("()", "")} {")
 
         if (derivedClasses.startsWith(":")) {
           // Add parent class and interfaces to structure tree
@@ -506,6 +506,9 @@ class Transpiler(val replacements: List<Replacement>) {
 
   companion object {
     val DEBUG = false
+    
+    val R_CLASS = Regex("(\\s*)(open |data |abstract |private |protected |internal |public |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{")
+    val R_FUN = Regex("\\s*(open |override |abstract |private |protected |internal |public |)*fun ([A-Za-z0-9_<>.]+)\\(.*\\).*")
   }
 
 }
