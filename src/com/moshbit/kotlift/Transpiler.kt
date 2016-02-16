@@ -1,24 +1,89 @@
 package com.moshbit.kotlift
 
 import java.util.*
-import kotlin.text.Regex
 
-class Transpiler(val source: List<String>, val replacements: List<Replacement>) {
-  val dest = ArrayList<String>(source.size)
+data class Classes(val name: String, var functions: LinkedList<String>, var properties: LinkedList<String>)
+data class Interfaces(val name: String, var functions: LinkedList<String>, var properties: LinkedList<String>)
 
-  // Kotlin has got a main function, but swift playground don't. So add a call to main() on the end.
-  var hasMain = false
+class Transpiler(val replacements: List<Replacement>) {
+  // List of all classes and interfaces. Must be set before transpile() calls.
+  // Needed to detect if override should be called or not.
+  val classesList = LinkedList<Classes>()
+  val interfacesList = LinkedList<Interfaces>()
 
-  val structureTree = ArrayList<StructureTree>()
-  var nextLine: String? = null
-  var nextInitBlockLine: String = "" // Line inside init {} block
 
-  fun transpile(): List<String> {
+  fun parse(source: List<String>) {
+    // Just transpile each file to parse all the lists
+    transpile(source)
+  }
+
+
+  fun transpile(source: List<String>): List<String> {
+    // Kotlin has got a main function, but swift playground don't. So add a call to main() on the end.
+    var hasMain = false
+
+    val dest = ArrayList<String>(source.size)
+    val structureTree = ArrayList<StructureTree>()
+
+    var nextLine: String? = null
+    var nextInitBlockLine: String = "" // Line inside init {} block
+
     var multiLineComment = false
     var insideTryCatch = false
     var nextLineForReplacement: String? = null
     var nextConstructor: String? = null
     var simulatedNextSourceLine: String? = null
+
+    // Constructor might look like "(let name: String, let admin: Bool = false)"
+    fun parseConstructorParams(originalConstructor: String, dataClassName: String?) {
+      val parameters = originalConstructor
+          .substring(originalConstructor.indexOf('(') + 1, originalConstructor.indexOf(')'))
+          .split(",").map { it.trim() }
+
+      val parameterNames = ArrayList<String>()
+
+      // Constructor parameters
+      for (parameter in parameters) {
+        if (parameter.startsWith("let ") || parameter.startsWith("var ")) {
+          // Create field in class
+          if (nextLine == null) {
+            nextLine = ""
+            nextInitBlockLine = ""
+          }
+
+          var trimmedParameter =
+              if (parameter.contains('=')) {
+                parameter.substring(0, parameter.indexOf('=') - 1)
+              } else {
+                parameter
+              }
+
+          nextLine += "  $trimmedParameter\n"
+          var parameterName = trimmedParameter.split(' ')[1].removeSuffix(":")
+          parameterNames += parameterName
+          nextInitBlockLine += "\n    self.$parameterName = $parameterName"
+
+          // Append to classes/interface list
+          for (index in structureTree.count() - 1 downTo 0) {
+            if (structureTree[index] is Class) {
+              classesList.last.properties.add(parameterName)
+              break
+            } else if (structureTree[index] is Interface) {
+              interfacesList.last.properties.add(parameterName)
+              break
+            }
+          }
+        }
+      }
+
+      // Data classes
+      if (dataClassName != null) {
+        nextLine += parameterNames.joinToString(
+            prefix = "\n  var description: String {\n    return \"$dataClassName(",
+            postfix = ")\"\n  }\n",
+            transform = { "$it=\\($it)" })
+      }
+    }
 
     var i = -1
     lineLoop@ while (i < source.size - 1) {
@@ -78,16 +143,31 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
         simulatedNextSourceLine = "}"
       }
 
-
       // Build structure tree
       var nextStructureTreeElement =
-          if (line.matches(Regex("\\s*(open |override |abstract |)*fun .*"))) {
+          if (line.matches(Regex("\\s*(open |override |abstract |)*fun ([A-Za-z0-9_<>.]+)\\(.*\\).*"))) {
             Function()
           } else if (line.matches(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"))) {
+            val name = line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$3")
+
+            // Add to classes list
+            if(classesList.find { it.name == name } == null) {
+              classesList.add(Classes(name, LinkedList(), LinkedList()))
+            }
+
             Class()
           } else if (line.matches(Regex("(\\s*)companion object \\{"))) {
             structureTree.add(CompanionObject())
             continue
+          } else if (line.matches(Regex("(\\s*)interface ([A-Za-z0-9_]+) \\{"))) {
+            val name = line.replace(Regex("(\\s*)interface ([A-Za-z0-9_]+) \\{"), "$2")
+
+            // Add to interfaces list
+            if(interfacesList.find { it.name == name } == null) {
+              interfacesList.add(Interfaces(name, LinkedList(), LinkedList()))
+            }
+
+            Interface(name)
           } else {
             Block()
           }
@@ -103,7 +183,7 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
 
           // Apply nextConstructor even when no init{} section was given in kotlin
           if (lastElement is Class && lastElement.constructorWritten == false && nextConstructor != "") {
-            val prefix = if (lastElement.derivedClass) "override " else ""
+            val prefix = if (lastElement.parentClass != null) "override " else ""
             dest.add("  $prefix$nextConstructor {$nextInitBlockLine\n  }")
           }
 
@@ -151,16 +231,59 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
 
 
       // Translate function calls
-      if (line.matches(Regex("\\s*(open |override |abstract |)*fun .*"))) {
+      if (line.matches(Regex("\\s*(open |override |abstract |)*fun ([A-Za-z0-9_<>.]+)\\(.*\\).*"))) {
+        val functionName = line.replace(Regex("\\s*(open |override |abstract |)*fun ([A-Za-z0-9_<>.]+)\\(.*\\).*"), "$2")
+
+        // Append to classes/interface list
+        for (index in structureTree.count() - 1 downTo 0) {
+          if (structureTree[index] is Class) {
+            classesList.last.functions.add(functionName)
+            break
+          } else if (structureTree[index] is Interface) {
+            interfacesList.last.functions.add(functionName)
+            break
+          }
+        }
+
         // fun -> func
         line = line.replace("open ", "").replace("fun ", "func ")
         // Return values
         line = line.replace("):", ") ->")
         line = line.replace(") :", ") ->")
 
+        // No swift override-keyword when function is defined by interface
+        for (index in structureTree.count() - 1 downTo 0) {
+          val structureTreeNode = structureTree[index]
+          if (structureTreeNode is Class) {
+            // Check all parent interfaces
+            for (parentInterface in structureTreeNode.parentInterfaces) {
+              if (interfacesList.find { it.name == parentInterface }?.functions?.find { it == functionName } != null) {
+                // Function found in interface: Remove "override"
+                line = line.replace("override ", "")
+              }
+            }
+            break
+          }
+        }
+
         // Abstract
         if (line.contains("abstract ")) {
           line = line.replace("abstract ", "") + " {\n    fatalError(\"Method is abstract\")\n  }"
+        }
+      }
+
+
+      // Properties
+      if (line.matches(Regex("\\s*(var|val) ([A-Za-z0-9_]+).*"))) {
+        // Append to classes/interface list
+        for (index in structureTree.count() - 1 downTo 0) {
+          if (structureTree[index] is Class) {
+            classesList.last.properties.add(line.replace(Regex("\\s*(var|val) ([A-Za-z0-9_]+).*"), "$2"))
+            break
+          } else if (structureTree[index] is Interface) {
+            interfacesList.last.properties.add(line.replace(Regex("\\s*(var|val) ([A-Za-z0-9_]+).*"), "$2"))
+            break
+          }
         }
       }
 
@@ -255,20 +378,27 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
 
 
         // Inheritance
-        val derivedClass = line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$7")
-        line = line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$1class $3$4${derivedClass.replace("()", "")} {")
+        val derivedClasses = line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$7")
+        line = line.replace(Regex("(\\s*)(open |data |abstract |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{"), "$1class $3$4${derivedClasses.replace("()", "")} {")
 
-
-        if (derivedClass.contains("(")) {
-          // Current class is a derived class, as it inherits also from a class and not only from a protocol
-          (structureTree.last { it is Class } as Class).derivedClass = true
+        if (derivedClasses.startsWith(":")) {
+          // Add parent class and interfaces to structure tree
+          for (derivedClass in derivedClasses.substring(1).split(", ")) {
+            if (derivedClass.trim().endsWith("()")) {
+              // Class
+              (structureTree.last { it is Class } as Class).parentClass = derivedClass.replace("()", "").trim()
+            } else {
+              // Interface
+              (structureTree.last { it is Class } as Class).parentInterfaces.add(derivedClass.replace("()", "").trim())
+            }
+          }
         }
 
       }
       // Constructor
       if (line.matches(Regex("(\\s*)(override |)init \\{")) || line.matches(Regex("(\\s*)(override |)init \\{.*}"))) {
         // TODO @V Decide if all arguments must be labeled or should be unlabeled (external name = "_")
-        val prefix = if ((structureTree.last { it is Class } as Class).derivedClass) "override " else ""
+        val prefix = if ((structureTree.last { it is Class } as Class).parentClass != null) "override " else ""
 
         line = line.replace(Regex("(\\s*)(override |)init \\{"), "$1$prefix$nextConstructor {$nextInitBlockLine")
         nextConstructor = ""
@@ -340,55 +470,30 @@ class Transpiler(val source: List<String>, val replacements: List<Replacement>) 
       throw IllegalStateException("Structure tree should be empty, but is $structureTree")
     }
 
-    return dest
-  }
-
-  // Constructor might look like "(let name: String, let admin: Bool = false)"
-  private fun parseConstructorParams(originalConstructor: String, dataClassName: String?) {
-    val parameters = originalConstructor
-        .substring(originalConstructor.indexOf('(') + 1, originalConstructor.indexOf(')'))
-        .split(",").map { it.trim() }
-
-    val parameterNames = ArrayList<String>()
-
-    // Constructor parameters
-    for (parameter in parameters) {
-      if (parameter.startsWith("let ") || parameter.startsWith("var ")) {
-        // Create field in class
-        if (nextLine == null) {
-          nextLine = ""
-          nextInitBlockLine = ""
-        }
-
-        var trimmedParameter =
-            if (parameter.contains('=')) {
-              parameter.substring(0, parameter.indexOf('=') - 1)
-            } else {
-              parameter
-            }
-
-        nextLine += "  $trimmedParameter\n"
-        var parameterName = trimmedParameter.split(' ')[1].removeSuffix(":")
-        parameterNames += parameterName
-        nextInitBlockLine += "\n    self.$parameterName = $parameterName"
+    // Print classes and interfaces
+    if (DEBUG) {
+      for (classes in classesList) {
+        println("        class ${classes.name}: ${classes.functions} ${classes.properties}")
+      }
+      for (interfaces in interfacesList) {
+        println("        interface ${interfaces.name}: ${interfaces.functions} ${interfaces.properties}")
       }
     }
 
-    // Data classes
-    if (dataClassName != null) {
-      nextLine += parameterNames.joinToString(
-          prefix = "\n  var description: String {\n    return \"$dataClassName(",
-          postfix = ")\"\n  }\n",
-          transform = { "$it=\\($it)" })
-    }
+    return dest
+  }
+
+  companion object {
+    val DEBUG = false
   }
 
 }
 
 open class StructureTree
 
-class Class(var constructorWritten: Boolean = false, var derivedClass: Boolean = false) : StructureTree()
+class Class(var constructorWritten: Boolean = false, var parentClass: String? = null, var parentInterfaces: LinkedList<String> = LinkedList()) : StructureTree()
 class Function : StructureTree()
 class Block : StructureTree()
 class AddLine(val lineToInsert: String) : StructureTree()
 class CompanionObject : StructureTree()
+class Interface(name: String) : StructureTree()

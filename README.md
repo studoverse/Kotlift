@@ -28,6 +28,7 @@ The following language features are currently transpiled, but some edge cases mi
 * Classes with none or one constructor
 * Inheritance
 * Abstract classes
+* Interfaces / protocols
 * Data classes (constructor and description will be generated)
 * Generics
 * Extension functions
@@ -43,7 +44,7 @@ The following features are currently unsupported, but are ordered by likelihood 
 * Lambdas / closures
 * Maps / dictionaries and sets
 * Enums
-* (Data) classes with opening & closing brackets in same line or without brackets at all
+* (Data) classes or functions with opening & closing brackets in same line or without brackets at all
 * Line-wrapped function and class definitions
 * Unnamed constructor parameter
 * ...

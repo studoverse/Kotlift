@@ -28,9 +28,22 @@ fun main(args: Array<String>) {
 
   println(sourceFiles)
 
+  val transpiler = Transpiler(replacements)
+
+  print("Parsing...    ")
+
+  // Parse each file
   for (file in sourceFiles) {
     val lines = Files.readAllLines(Paths.get(file.path), Charsets.UTF_8)
-    val destLines = Transpiler(lines, replacements).transpile()
+    transpiler.parse(lines)
+  }
+
+  print(" finished\nTranspiling...")
+
+  // Transpile each file
+  for (file in sourceFiles) {
+    val lines = Files.readAllLines(Paths.get(file.path), Charsets.UTF_8)
+    val destLines = transpiler.transpile(lines)
 
     val destPath = Paths.get(file.path.replace(sourcePath, destinationPath).replace(".kt", ".swift"))
     destinationFiles.add(destPath.toFile())
@@ -40,6 +53,7 @@ fun main(args: Array<String>) {
 
   // Validate
   if (args.count() == 4) {
+    print(" finished\nValidating...  ")
     var errorCount = 0
     val testDestinationPath = args[3]
 
@@ -75,10 +89,12 @@ fun main(args: Array<String>) {
     }
 
     if (errorCount == 0) {
-      println("OK")
+      println("finished - everything OK")
     } else {
-      println("$errorCount ERRORS")
+      println("finished - $errorCount ERRORS")
     }
+  } else {
+    println(" finished")
   }
 }
 
@@ -97,7 +113,6 @@ fun loadReplacementList(file: File): List<Replacement> {
     }
   }
 
-  println("Replacements: $list")
   return list
 }
 
