@@ -33,18 +33,18 @@ The following language features are currently transpiled, but some edge cases mi
 * Generics
 * Extension functions
 * Companion objects / static class properties
+* Properties with getters and setters / backing fields / computed properties
 
 ### Unsupported features ###
 
 The following features are currently unsupported, but are ordered by likelihood to be implemented soon:
 
-* Computed properties
 * Visibility modifiers
 * Force optional unwrapping
 * Lambdas / closures
 * Maps / dictionaries and sets
 * Enums
-* (Data) classes or functions with opening & closing brackets in same line or without brackets at all
+* (Data) classes, functions or getters & setters with opening & closing brackets in same line or without brackets at all
 * Line-wrapped function and class definitions
 * Unnamed constructor parameter
 * ...

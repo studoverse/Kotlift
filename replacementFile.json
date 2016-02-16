@@ -18,6 +18,7 @@
   {"from":"9f", "to":"9"},
   {"from":"println(", "to":"print("},
   {"from":"print()", "to":"print(\"\")"},
-  {"from":"interface ", "to":"protocol "}
+  {"from":"interface ", "to":"protocol "},
+  {"from":"get() ", "to":"get "}
   // END - DO NOT MODIFY THIS SECTION
 ]

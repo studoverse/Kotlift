@@ -25,7 +25,7 @@ class Transpiler(val replacements: List<Replacement>) {
     val dest = ArrayList<String>(source.size)
     val structureTree = ArrayList<StructureTree>()
 
-    var nextLine: String? = null
+    var nextOutputLine: String? = null
     var nextInitBlockLine: String = "" // Line inside init {} block
 
     var multiLineComment = false
@@ -46,8 +46,8 @@ class Transpiler(val replacements: List<Replacement>) {
       for (parameter in parameters) {
         if (parameter.startsWith("let ") || parameter.startsWith("var ")) {
           // Create field in class
-          if (nextLine == null) {
-            nextLine = ""
+          if (nextOutputLine == null) {
+            nextOutputLine = ""
             nextInitBlockLine = ""
           }
 
@@ -58,7 +58,7 @@ class Transpiler(val replacements: List<Replacement>) {
                 parameter
               }
 
-          nextLine += "  $trimmedParameter\n"
+          nextOutputLine += "  $trimmedParameter\n"
           var parameterName = trimmedParameter.split(' ')[1].removeSuffix(":")
           parameterNames += parameterName
           nextInitBlockLine += "\n    self.$parameterName = $parameterName"
@@ -78,7 +78,7 @@ class Transpiler(val replacements: List<Replacement>) {
 
       // Data classes
       if (dataClassName != null) {
-        nextLine += parameterNames.joinToString(
+        nextOutputLine += parameterNames.joinToString(
             prefix = "\n  var description: String {\n    return \"$dataClassName(",
             postfix = ")\"\n  }\n",
             transform = { "$it=\\($it)" })
@@ -96,6 +96,7 @@ class Transpiler(val replacements: List<Replacement>) {
             simulatedNextSourceLine
           }
       simulatedNextSourceLine = null
+      val nextInputLine = if (i < source.size - 1) source[i + 1] else ""
 
 
       // Replace with SWIFT rewrite (keep indent and comment)
@@ -197,7 +198,17 @@ class Transpiler(val replacements: List<Replacement>) {
 
           // Add line if noted in structure tree
           if (structureTree.isNotEmpty() && structureTree.last() is AddLine) {
-            dest.add((structureTree.last() as AddLine).lineToInsert)
+            val addLine = (structureTree.last() as AddLine)
+            if (addLine.nextLine) {
+              // Don't close bracket when setter of computed property comes next
+              if (addLine is ComputedProperty && nextInputLine.matches(Regex("\\s*(get|set)\\(.*"))) {
+                structureTree.add(ComputedProperty())
+              } else {
+                nextOutputLine = addLine.lineToInsert
+              }
+            } else {
+              dest.add(addLine.lineToInsert)
+            }
             structureTree.removeAt(structureTree.lastIndex)
           }
         }
@@ -284,6 +295,16 @@ class Transpiler(val replacements: List<Replacement>) {
             interfacesList.last.properties.add(line.replace(Regex("\\s*(var|val) ([A-Za-z0-9_]+).*"), "$2"))
             break
           }
+        }
+
+        // Custom getter+setter / computed properties
+        if (nextInputLine.matches(Regex("\\s*(get|set)\\(.*"))) {
+          // In swift computed properties must always be var
+          line = line.replace("val ", "var ")
+          line += " {"
+
+          // Add closing bracket
+          structureTree.add(ComputedProperty())
         }
       }
 
@@ -455,9 +476,9 @@ class Transpiler(val replacements: List<Replacement>) {
 
       dest.add(line)
 
-      if (nextLine != null) {
-        dest.add(nextLine!!)
-        nextLine = null
+      if (nextOutputLine != null) {
+        dest.add(nextOutputLine!!)
+        nextOutputLine = null
       }
     }
 
@@ -494,6 +515,7 @@ open class StructureTree
 class Class(var constructorWritten: Boolean = false, var parentClass: String? = null, var parentInterfaces: LinkedList<String> = LinkedList()) : StructureTree()
 class Function : StructureTree()
 class Block : StructureTree()
-class AddLine(val lineToInsert: String) : StructureTree()
+open class AddLine(val lineToInsert: String, val nextLine: Boolean = false) : StructureTree()
+class ComputedProperty : AddLine("}", nextLine = true)
 class CompanionObject : StructureTree()
 class Interface(name: String) : StructureTree()
