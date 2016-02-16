@@ -2,34 +2,34 @@
  * See https://kotlinlang.org/docs/reference/classes.html
  */
 
-class Empty {
+public class Empty {
     init() {}
 }
 
-class Empty2 {
+public class Empty2 {
     init() {
 
     }
 }
 
-class Thing {
+public class Thing {
     init(name: String, height: Int, width: Int, cool: Bool) {
 
     }
 }
 
-class Customer {
+public class Customer {
     init(name: String) {
         print("Customer initialized with value \(name)")
     }
 }
 
-class Thing2 {
+public class Thing2 {
   init(name: String, height: Int, width: Int, cool: Bool) {
   }
 }
 
-class House {
+public class House {
     init() {
         print("Builing a new house")
     }

@@ -1,16 +1,16 @@
-class Base {
+public class Base {
   func v() { print("ERROR-Open") }
   func nv() { print("4") }
   init() { print("1") }
 }
 
-class Derived: Base {
+public class Derived: Base {
   override func v() { print("ERROR-Derived") }
   func x() { print("6") }
   override init() { print("2") }
 }
 
-class Derived2: Derived {
+public class Derived2: Derived {
   override func v() { print("5") }
   func y() { print("7") }
   override init() { print("3") }

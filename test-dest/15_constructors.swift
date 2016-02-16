@@ -5,7 +5,7 @@
  * Name: Bridge (Bridge)
  */
 
-class User {
+public class User {
   let name: String
   let admin: Bool
 
@@ -22,7 +22,7 @@ class User {
   }
 }
 
-class House {
+public class House {
   let name: String
 
   var address = ""

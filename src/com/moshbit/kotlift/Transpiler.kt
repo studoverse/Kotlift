@@ -44,7 +44,7 @@ class Transpiler(val replacements: List<Replacement>) {
 
       // Constructor parameters
       for (parameter in parameters) {
-        if (parameter.startsWith("let ") || parameter.startsWith("var ")) {
+        if (parameter.matches(Regex("(.* |)let .*")) || parameter.matches(Regex("(.* |)var .*"))) {
           // Create field in class
           if (nextOutputLine == null) {
             nextOutputLine = ""
@@ -149,7 +149,7 @@ class Transpiler(val replacements: List<Replacement>) {
           if (line.matches(R_FUN)) {
             Function()
           } else if (line.matches(R_CLASS)) {
-            val name = line.replace(R_CLASS, "$3")
+            val name = line.replace(R_CLASS, "$4")
 
             // Add to classes list
             if(classesList.find { it.name == name } == null) {
@@ -243,7 +243,7 @@ class Transpiler(val replacements: List<Replacement>) {
 
       // Translate function calls
       if (line.matches(R_FUN)) {
-        val functionName = line.replace(R_FUN, "$2")
+        val functionName = line.replace(R_FUN, "$3")
 
         // Append to classes/interface list
         for (index in structureTree.count() - 1 downTo 0) {
@@ -378,13 +378,20 @@ class Transpiler(val replacements: List<Replacement>) {
       // Classes
       // Declaration
       if (line.matches(R_CLASS)) {
-        nextConstructor = line.replace(R_CLASS, "init$5")
+        // Classes (and its members) are in kotlin default public when not otherwise specified
+        val modifier = line.replace(R_CLASS, "$2")
+        if (!modifier.contains("private ") && !modifier.contains("protected ")
+            && !modifier.contains("internal ") && !modifier.contains("public ")) {
+          line = "public " + line
+        }
+
+        nextConstructor = line.replace(R_CLASS, "init$6")
 
         // Data classes
         val dataClassName =
-            if (line.trim().startsWith("data")) {
+            if (line.matches(Regex("(.* |)data .*"))) {
               line = line.substring(0, line.length - 2) + ": CustomStringConvertible {"
-              line.replace(R_CLASS, "$3")
+              line.replace(R_CLASS, "$4")
             } else {
               null
             }
@@ -399,8 +406,9 @@ class Transpiler(val replacements: List<Replacement>) {
 
 
         // Inheritance
-        val derivedClasses = line.replace(R_CLASS, "$7")
-        line = line.replace(R_CLASS, "$1class $3$4${derivedClasses.replace("()", "")} {")
+        val derivedClasses = line.replace(R_CLASS, "$8")
+        line = line.replace(R_CLASS, "$1$2class $4$5${derivedClasses.replace("()", "")} {")
+            .replace("open ", "").replace("abstract ", "").replace("data ", "")
 
         if (derivedClasses.startsWith(":")) {
           // Add parent class and interfaces to structure tree
@@ -507,8 +515,8 @@ class Transpiler(val replacements: List<Replacement>) {
   companion object {
     val DEBUG = false
     
-    val R_CLASS = Regex("(\\s*)(open |data |abstract |private |protected |internal |public |)*class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{")
-    val R_FUN = Regex("\\s*(open |override |abstract |private |protected |internal |public |)*fun ([A-Za-z0-9_<>.]+)\\(.*\\).*")
+    val R_CLASS = Regex("(\\s*)((open |data |abstract |private |protected |internal |public |)*)class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{")
+    val R_FUN = Regex("\\s*((open |override |abstract |private |protected |internal |public |)*)fun ([A-Za-z0-9_<>.]+)\\(.*\\).*")
   }
 
 }

@@ -7,7 +7,7 @@ protocol MyInterface {
   }*/
 }
 
-class Implementation: MyInterface {
+public class Implementation: MyInterface {
   func bar() -> String {
     return "2-Implementation"
   }
@@ -17,7 +17,7 @@ class Implementation: MyInterface {
 
 // Interface + Inheritance
 
-class Parent {
+public class Parent {
   func three() -> Int {
     return 3
   }
@@ -27,7 +27,7 @@ class Parent {
   }
 }
 
-class Child: Parent, MyInterface {
+public class Child: Parent, MyInterface {
   let five = 5
   func six() -> String {
     return "6"
@@ -41,7 +41,7 @@ class Child: Parent, MyInterface {
 
 // Abstract Interface + Inheritance
 
-class AbstractParent {
+public class AbstractParent {
   func three() -> Int {
     fatalError("Method is abstract")
   }
@@ -51,12 +51,12 @@ class AbstractParent {
   }
 }
 
-class AbstractChild: Parent {
+public class AbstractChild: Parent {
   override init() {
   }
 }
 
-class NonAbstractChild: AbstractChild, MyInterface {
+public class NonAbstractChild: AbstractChild, MyInterface {
   func bar() -> String {
     return "2-NonAbstractChild"
   }

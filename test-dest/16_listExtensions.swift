@@ -19,7 +19,7 @@ func avg() -> Double {
 }
 }
 
-class Person {
+public class Person {
   let name: String
   let age: Int
 

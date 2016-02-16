@@ -1,4 +1,4 @@
-class User: CustomStringConvertible {
+public class User: CustomStringConvertible {
   let name: String
   var address: String
   var age: Int

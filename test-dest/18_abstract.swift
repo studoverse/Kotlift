@@ -1,4 +1,4 @@
-class Base {
+public class Base {
   func f() {}
   func g() {
     print("g() called")
@@ -7,7 +7,7 @@ class Base {
   }
 }
 
-class Derived: Base {
+public class Derived: Base {
   override func f() {
     fatalError("Method is abstract")
   }
@@ -15,7 +15,7 @@ class Derived: Base {
   }
 }
 
-class Derived2: Base {
+public class Derived2: Base {
   override func f() {
     print("f() called")
   }

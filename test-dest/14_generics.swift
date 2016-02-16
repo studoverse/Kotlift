@@ -1,4 +1,4 @@
-class Box<T> {
+public class Box<T> {
   var value: T // value = t won't work, as self must happen in swift inside constructor
 
   func doNothing(value2: T) -> T {
@@ -10,7 +10,7 @@ class Box<T> {
   }
 }
 
-class BigBox<T> {
+public class BigBox<T> {
   var value1: T
   let value2: T
 

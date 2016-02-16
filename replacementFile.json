@@ -19,6 +19,7 @@
   {"from":"println(", "to":"print("},
   {"from":"print()", "to":"print(\"\")"},
   {"from":"interface ", "to":"protocol "},
-  {"from":"get() ", "to":"get "}
+  {"from":"get() ", "to":"get "},
+  {"from":"protected ", "to":"internal "}
   // END - DO NOT MODIFY THIS SECTION
 ]
