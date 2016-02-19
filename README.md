@@ -1,5 +1,7 @@
 # Kotlift #
 
+![Kotlift: The first source-to-source language transpiler from Kotlin to Swift](banner.png)
+
 Kotlift is the first source-to-source language transpiler from Kotlin to Swift.
 
 It is not intended to support the full Kotlin or Swift language, but most of the generated Swift code will be valid. Neither functions from the Kotlin stdlib are support, nor framework interfacing code from Android or iOS/Cocoa.
