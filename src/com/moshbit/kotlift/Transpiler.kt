@@ -176,7 +176,11 @@ class Transpiler(val replacements: List<Replacement>) {
           }
 
       // Match each block start and end, but avoid looking inside strings
-      val noStringLine = line.replace(Regex("[^\\\\]\".*[^\\\\]\""), "")
+      var noStringLine = line
+      while (noStringLine.matches(Regex("(.*[^\\\\])\"(.+?[^\\\\])\"(.*)"))) {
+        noStringLine = noStringLine.replace(Regex("(.*[^\\\\])\"(.+?[^\\\\])\"(.*)"), "$1\"\"$3")
+      }
+
       for (c in noStringLine) {
         if (c == '{') {
           structureTree.add(nextStructureTreeElement)
@@ -386,13 +390,19 @@ class Transpiler(val replacements: List<Replacement>) {
       if (line.matches(Regex("(.*)arrayListOf<(.*)>(.*)"))) {
         line = line.replace(Regex("(.*)arrayListOf<(.*)>(.*)"), "$1[$2]$3")
       }
+      if (line.matches(Regex("(.*)arrayListOf?\\((.*)\\)"))) {
+        line = line.replace(Regex("(.*)arrayListOf\\((.*)\\)"), "$1[$2]")
+      }
 
-      // Translate ArrayList and LinkedList --> []
+      // Translate List, ArrayList and LinkedList --> Array
+      if (line.matches(Regex("(.*)ArrayList<(.*)>(.*)"))) {
+        line = line.replace(Regex("(.*)ArrayList<(.*)>(.*)"), "$1[$2]$3")
+      }
       if (line.matches(Regex("(.*)LinkedList<(.*)>(.*)"))) {
         line = line.replace(Regex("(.*)LinkedList<(.*)>(.*)"), "$1[$2]$3")
       }
-      if (line.matches(Regex("(.*)ArrayList<(.*)>(.*)"))) {
-        line = line.replace(Regex("(.*)ArrayList<(.*)>(.*)"), "$1[$2]$3")
+      if (line.matches(Regex("(.*)List<(.*)>(.*)"))) {
+        line = line.replace(Regex("(.*)List<(.*)>(.*)"), "$1Array<$2>$3")
       }
 
 
@@ -471,17 +481,17 @@ class Transpiler(val replacements: List<Replacement>) {
 
 
       // Extension functions
-      if (line.matches(Regex("(\\s*)func List(<.*>|)\\.(.*)"))) {
+      if (line.matches(Regex("(\\s*)func Array(<.*>|)\\.(.*)"))) {
         // List -> Array
 
         // Int and Double can not be extended when used in an array, so use Addable protocol
-        var listType = line.replace(Regex("(\\s*)func List(<.*>|)\\.(.*)"), "$2")
+        var listType = line.replace(Regex("(\\s*)func Array(<.*>|)\\.(.*)"), "$2")
         if (listType == "<Int>" || listType == "<Double>") {
           listType = "Addable"
         }
         listType = listType.replace("<", "").replace(">", "")
 
-        line = line.replace(Regex("(\\s*)func List(<.*>|)\\.(.*)"), "extension Array where Element : $listType {\n") +
+        line = line.replace(Regex("(\\s*)func Array(<.*>|)\\.(.*)"), "extension Array where Element : $listType {\n") +
             line.replace(Regex("(\\s*)func ([A-Za-z0-9_]+)(<.*>|)\\.(.*)"), "$1func $4")
 
         // Close extension
@@ -502,6 +512,15 @@ class Transpiler(val replacements: List<Replacement>) {
         line = line.replace(Regex("(\\s*)(func|var|let) (.*)"), "$1static $2 $3")
       }
 
+
+      // Lambdas: { x -> x } --> { x in x }
+      while (line.matches(Regex("(.*\\{.*) -> (.*\\}.*)"))) {
+        line = line.replace(Regex("(.*\\{.*) -> (.*\\}.*)"), "$1 in $2")
+      }
+      // Lambdas: { it } --> { $0 }
+      while (line.matches(Regex("(.*\\{.*)it(.*\\}.*)"))) {
+        line = line.replace(Regex("(.*\\{.*)it(.*\\}.*)"), "$1\\$0$2")
+      }
 
       dest.add(line)
 
@@ -536,8 +555,8 @@ class Transpiler(val replacements: List<Replacement>) {
   companion object {
     val DEBUG = false
 
-    val R_CLASS = Regex("(\\s*)((open |data |abstract |private |protected |internal |public |)*)class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{")
-    val R_FUN = Regex("(\\s*)((open |override |abstract |private |protected |internal |public |)*)fun( |(<T>))+([A-Za-z0-9_<>.]+)(\\(.*\\).*)")
+    val R_CLASS = Regex("(\\s*)((open |data |abstract |private |protected |internal |public |)*)class ([A-Za-z0-9_]+)(<.+?>|)(\\([^\\)]*\\)|)( ?(.*)) \\{")
+    val R_FUN = Regex("(\\s*)((open |override |abstract |private |protected |internal |public |)*)fun( |(<.+?>))+([A-Za-z0-9_<>.]+)(\\(.*\\).*)")
   }
 
 }

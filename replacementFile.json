@@ -9,6 +9,7 @@
   {"from":"print\\(\\)", "to":"print(\"\")"},
   {"from":"interface", "to":"protocol"},
   {"from":"get\\(\\)", "to":"get"},
-  {"from":"protected", "to":"internal"}
+  {"from":"protected", "to":"internal"},
+  {"from":"Collection", "to":"Array"}
   // END - DO NOT MODIFY THIS SECTION
 ]
