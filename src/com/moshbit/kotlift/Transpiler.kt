@@ -99,13 +99,6 @@ class Transpiler(val replacements: List<Replacement>) {
       val nextInputLine = if (i < source.size - 1) source[i + 1] else ""
 
 
-      // Replace with SWIFT rewrite (keep indent and comment)
-      if (nextLineForReplacement != null) {
-        dest.add(line.replace(Regex("(\\s*)(.*)"), "$1") + nextLineForReplacement)
-        nextLineForReplacement = null
-        continue
-      }
-
       // Detect SWIFT rewrite
       if (line.matches(Regex("(.*)SWIFT: (.*)"))) {
         nextLineForReplacement = line.replace(Regex("(.*)SWIFT: (.*)"), "$2")
@@ -137,6 +130,9 @@ class Transpiler(val replacements: List<Replacement>) {
         continue
       }
 
+
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      // Build structure tree
 
       // Make sure all classes end with {}
       if (line.matches(Regex("(.* |)class .*")) && !line.endsWith("{")) {
@@ -220,6 +216,16 @@ class Transpiler(val replacements: List<Replacement>) {
         }
       }
 
+
+      // Replace with SWIFT rewrite (keep indent and comment)
+      if (nextLineForReplacement != null) {
+        dest.add(line.replace(Regex("(\\s*)(.*)"), "$1") + nextLineForReplacement)
+        nextLineForReplacement = null
+        continue
+      }
+
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      // Start with translations
 
       // Translate arrays
       while (line.matches(Regex("(.*)Array<([A-Za-z0-9_]+)>(.*)"))) {
