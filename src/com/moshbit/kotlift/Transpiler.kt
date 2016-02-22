@@ -152,7 +152,7 @@ class Transpiler(val replacements: List<Replacement>) {
             val name = line.replace(R_CLASS, "$4")
 
             // Add to classes list
-            if(classesList.find { it.name == name } == null) {
+            if (classesList.find { it.name == name } == null) {
               classesList.add(Classes(name, LinkedList(), LinkedList()))
             }
 
@@ -164,11 +164,13 @@ class Transpiler(val replacements: List<Replacement>) {
             val name = line.replace(Regex("(\\s*)interface ([A-Za-z0-9_]+) \\{"), "$2")
 
             // Add to interfaces list
-            if(interfacesList.find { it.name == name } == null) {
+            if (interfacesList.find { it.name == name } == null) {
               interfacesList.add(Interfaces(name, LinkedList(), LinkedList()))
             }
 
             Interface(name)
+          } else if (line.matches(Regex("(\\s*)when (.*)"))) {
+            SwitchCase()
           } else {
             Block()
           }
@@ -235,15 +237,18 @@ class Transpiler(val replacements: List<Replacement>) {
       // Switch
       // Translate when -> switch
       line = line.replace(Regex("(\\s*)when (.*)"), "$1switch $2")
-      // Translate "else ->" -> "default:"
-      line = line.replace(Regex("(\\s*)else -> (.*)"), "$1default: $2")
-      // Translate "x ->" -> "case x:"
-      line = line.replace(Regex("(\\s*)(.*) -> (.*)"), "$1case $2: $3")
+
+      if (structureTree.isNotEmpty() && structureTree.last() is SwitchCase) {
+        // Translate "else ->" -> "default:"
+        line = line.replace(Regex("(\\s*)else -> (.*)"), "$1default: $2")
+        // Translate "x ->" -> "case x:"
+        line = line.replace(Regex("(\\s*)(.*) -> (.*)"), "$1case $2: $3")
+      }
 
 
       // Translate function calls
       if (line.matches(R_FUN)) {
-        val functionName = line.replace(R_FUN, "$3")
+        val functionName = line.replace(R_FUN, "$6")
 
         // Append to classes/interface list
         for (index in structureTree.count() - 1 downTo 0) {
@@ -256,8 +261,11 @@ class Transpiler(val replacements: List<Replacement>) {
           }
         }
 
+        // Generic: fun <T> foo() --> func foo<T>()
+        line = line.replace(R_FUN, "$1$2func $6$5$7")
+
         // fun -> func
-        line = line.replace("open ", "").replace("fun ", "func ")
+        line = line.replace("open ", "")
         // Return values
         line = line.replace("):", ") ->")
         line = line.replace(") :", ") ->")
@@ -527,9 +535,9 @@ class Transpiler(val replacements: List<Replacement>) {
 
   companion object {
     val DEBUG = false
-    
+
     val R_CLASS = Regex("(\\s*)((open |data |abstract |private |protected |internal |public |)*)class ([A-Za-z0-9_]+)(<.*>|)(\\([^\\)]*\\)|)( ?(.*)) \\{")
-    val R_FUN = Regex("\\s*((open |override |abstract |private |protected |internal |public |)*)fun ([A-Za-z0-9_<>.]+)\\(.*\\).*")
+    val R_FUN = Regex("(\\s*)((open |override |abstract |private |protected |internal |public |)*)fun( |(<T>))+([A-Za-z0-9_<>.]+)(\\(.*\\).*)")
   }
 
 }
@@ -539,6 +547,7 @@ open class StructureTree
 class Class(var constructorWritten: Boolean = false, var parentClass: String? = null, var parentInterfaces: LinkedList<String> = LinkedList()) : StructureTree()
 class Function : StructureTree()
 class Block : StructureTree()
+class SwitchCase : StructureTree()
 open class AddLine(val lineToInsert: String, val nextLine: Boolean = false) : StructureTree()
 class ComputedProperty : AddLine("}", nextLine = true)
 class CompanionObject : StructureTree()
