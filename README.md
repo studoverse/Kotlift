@@ -12,7 +12,7 @@ It is not intended to support the full Kotlin or Swift language, but most of the
 All framework interfacing code from Android or iOS/Cocoa is not supported.
 A lot of functions from the Kotlin stdlib are the same in Swift, so there should be less logic to rewrite.
 
-Kotlift uses lots of regular expressions and a simple structure tree.
+Kotlift is already used in production by [Moshbit App Design & Development](http://moshbit.com).
 
 Supported versions: Kotlin 1.0.0, Swift 2.1
 
@@ -24,7 +24,7 @@ The following language features are currently transpiled, but some edge cases mi
 * Functions with parameters
 * For and while loops
 * String interpolation
-* Main function calling (in swift playground)
+* Main function calling (in Swift playground)
 * Custom rewrites (comment the preceding line with `// SWIFT: this.will(be.replaced)` to replace the following line)
 * Basic null safety
 * Basic try-catch
@@ -68,6 +68,8 @@ The repository contains an IntelliJ project. Usage of precompiled jar:
 3. parameter: replacement file, used for standard language replacements and may be customized. (mandatory)
 4. parameter: Swift testcase folder. If given, all files in the destination folder are compared to the files in this
 folder. (optional)
+
+Kotlift uses lots of regular expressions and a simple structure tree.
 
 For advanced Kotlift usage in your own project, a file called replacementFile.json can be edited to customize
 replacements (like `.toString() `to `.mySwiftyToStringFunction()`).
