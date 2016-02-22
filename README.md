@@ -4,11 +4,15 @@
 
 Kotlift is the first source-to-source language transpiler from Kotlin to Swift.
 
-It is not intended to support the full Kotlin or Swift language, but most of the generated Swift code will be valid. Neither functions from the Kotlin stdlib are support, nor framework interfacing code from Android or iOS/Cocoa.
+Kotlift helps you to write business logic once, and reuse most of the code on iOS.
+Porting an app from Android to iOS will be faster and less error-prone.
+With Kotlift, Kotlin truly is the Swift of Android.
+
+It is not intended to support the full Kotlin or Swift language, but most of the generated Swift code will be valid.
+All framework interfacing code from Android or iOS/Cocoa is not supported.
+A lot of functions from the Kotlin stdlib are the same in Swift, so there should be less logic to rewrite.
 
 Kotlift uses lots of regular expressions and a simple structure tree.
-
-To use Kotlift for your own project, a file called replacementFile.json can be edited to customize replacements (like `.toString() `to `.mySwiftyToStringFunction()`).
 
 Supported versions: Kotlin 1.0.0, Swift 2.1
 
@@ -49,6 +53,7 @@ The following features are currently unsupported, but are ordered by likelihood 
 * (Data) classes, functions or getters & setters with opening & closing brackets in same line or without brackets at all
 * Line-wrapped function and class definitions
 * Unnamed constructor parameter
+* Unnamed function parameters (except the first one)
 * Finally / defer
 * ...
 
@@ -61,7 +66,11 @@ The repository contains an IntelliJ project. Usage of precompiled jar:
 1. parameter: folder of Kotlin source files. (mandatory)
 2. parameter: destination folder where Swift code should be written to. (mandatory)
 3. parameter: replacement file, used for standard language replacements and may be customized. (mandatory)
-4. parameter: Swift testcase folder. If given, all files in the destination folder are compared to the files in this folder. (optional)
+4. parameter: Swift testcase folder. If given, all files in the destination folder are compared to the files in this
+folder. (optional)
+
+For advanced Kotlift usage in your own project, a file called replacementFile.json can be edited to customize
+replacements (like `.toString() `to `.mySwiftyToStringFunction()`).
 
 ### Dependencies ###
 
@@ -69,7 +78,8 @@ The repository contains an IntelliJ project. Usage of precompiled jar:
 
 ### Contribution guidelines ###
 
-For every transpiled language feature there is a source Kotlin test file and a destination Swift test file. Calling Kotlift with a fourth argument not only transpiles all test files, but also compares them for any differences.
+For every transpiled language feature there is a source Kotlin test file and a destination Swift test file.
+Calling Kotlift with a fourth argument not only transpiles all test files, but also compares them for any differences.
 
 If you add any new features, please add a Kotlin and Swift test file. Pull requests are welcome.
 
