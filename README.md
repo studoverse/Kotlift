@@ -2,17 +2,20 @@
 
 ![Kotlift: The first source-to-source language transpiler from Kotlin to Swift](banner.png)
 
-Kotlift is the first source-to-source language transpiler from Kotlin to Swift.
+Kotlift is the first source-to-source language transpiler from [Kotlin](https://kotlinlang.org/) to
+[Swift](https://swift.org/).
 
 Kotlift helps you to write business logic once, and reuse most of the code on iOS.
 Porting an app from Android to iOS will be faster and less error-prone.
 With Kotlift, Kotlin truly is the Swift of Android.
 
-It is not intended to support the full Kotlin or Swift language, but most of the generated Swift code will be valid.
+The program is not intended to support the full Kotlin or Swift language, but most of the generated Swift code will be
+valid.
 All framework interfacing code from Android or iOS/Cocoa is not supported.
-A lot of functions from the Kotlin stdlib are the same in Swift, so there should be less logic to rewrite.
+Many functions from the Kotlin stdlib are the same in Swift, therefore less logic has to be rewritten.
 
-Kotlift is already used in production by [Moshbit App Design & Development](http://moshbit.com).
+Kotlift is already used in production by [Moshbit App Design & Development](http://moshbit.com) and will be updated to
+new Kotlin and Swift versions.
 
 Supported versions: Kotlin 1.0.0, Swift 2.1
 
@@ -43,6 +46,8 @@ The following language features are currently transpiled, but some edge cases mi
 * Visibility modifiers
 * Basic lambdas / closures
 
+See also the testcases in [Kotlin](/test-src) or the generated [Swift](/test-dest) files.
+
 ### Unsupported features ###
 
 The following features are currently unsupported, but are ordered by likelihood to be implemented soon:
@@ -59,7 +64,7 @@ The following features are currently unsupported, but are ordered by likelihood 
 
 ### Usage ###
 
-The repository contains an IntelliJ project. Usage of precompiled jar:
+The repository contains an IntelliJ project. Usage of the precompiled jar:
 
 `java -jar moshbit.kotlift.jar test-src dest replacementFile.json test-dest`
 
@@ -69,10 +74,10 @@ The repository contains an IntelliJ project. Usage of precompiled jar:
 4. parameter: Swift testcase folder. If given, all files in the destination folder are compared to the files in this
 folder. (optional)
 
-Kotlift uses lots of regular expressions and a simple structure tree.
+Kotlift uses various regular expressions and a simple structure tree.
 
-For advanced Kotlift usage in your own project, a file called replacementFile.json can be edited to customize
-replacements (like `.toString() `to `.mySwiftyToStringFunction()`).
+For advanced Kotlift usage in your project, modify replacementFile.json to customize
+replacements (such as `.toString() `to `.mySwiftyToStringFunction()`).
 
 ### Dependencies ###
 
@@ -80,9 +85,9 @@ replacements (like `.toString() `to `.mySwiftyToStringFunction()`).
 
 ### Contribution guidelines ###
 
-For every transpiled language feature there is a source Kotlin test file and a destination Swift test file.
-Calling Kotlift with a fourth argument not only transpiles all test files, but also compares them for any differences.
+For every transpiled language feature there is a Kotlin test file in test-src and a Swift file in test-dest.
+Executing Kotlift with a fourth argument not only transpiles all test files, but also checks them for any differences.
 
-If you add any new features, please add a Kotlin and Swift test file. Pull requests are welcome.
+Pull requests are welcome. If you add new features, please add Kotlin and Swift test files.
 
 Please contact valentin.slawicek@moshbit.com for any inquiries.
