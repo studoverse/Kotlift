@@ -11,7 +11,7 @@ public class FunkyClass {
   }
 }
 
-var computedProperty1: Int {
+var computedProperty1: Int32 {
   get {
     var a = 0
     a++
@@ -19,7 +19,7 @@ var computedProperty1: Int {
   }
 }
 
-var computedProperty2: Int {
+var computedProperty2: Int32 {
   get { return 2 }
 }
 
@@ -27,8 +27,8 @@ var computedProperty2: Int {
   get() = 3*/
 
 
-var _backingProperty: Int = 0
-var computedProperty4: Int {
+var _backingProperty: Int32 = 0
+var computedProperty4: Int32 {
   get {
       return 4 + _backingProperty
   }
@@ -37,7 +37,7 @@ var computedProperty4: Int {
   }
 }
 
-var computedProperty5: Int {
+var computedProperty5: Int32 {
   get { return 5 + _backingProperty }
   set(value) { _backingProperty = value }
 }

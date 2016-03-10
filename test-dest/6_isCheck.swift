@@ -11,7 +11,7 @@ func main(args: [String]) {
   print(getStringLength(1))
 }
 
-func getStringLength(obj: Any) -> Int? {
+func getStringLength(obj: Any) -> Int32? {
   if obj is String {
     return (obj as! String).length // no cast to String is needed
   }

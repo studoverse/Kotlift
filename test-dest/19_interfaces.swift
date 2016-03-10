@@ -18,7 +18,7 @@ public class Implementation: MyInterface {
 // Interface + Inheritance
 
 public class Parent {
-  func three() -> Int {
+  func three() -> Int32 {
     return 3
   }
 

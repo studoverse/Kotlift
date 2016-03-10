@@ -1,17 +1,17 @@
 public class MyClass {
-  func a() -> Int {
+  func a() -> Int32 {
     return 1
   }
   let d = 4
   var g = 7
 
-    static func b() -> Int {
+    static func b() -> Int32 {
       return 2
     }
     static let e = 5
     static var h = 8
 
-  func c() -> Int {
+  func c() -> Int32 {
     return 3
   }
   let f = 6

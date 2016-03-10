@@ -24,6 +24,7 @@ Supported versions: Kotlin 1.0.0, Swift 2.1
 The following language features are currently transpiled, but some edge cases might produce invalid Swift code.
 
 * Variables, arrays and lists
+* Basic types (String, Boolean, Double, Float, Long, Int, Short, Byte)
 * Functions with parameters
 * For and while loops
 * String interpolation
@@ -46,7 +47,7 @@ The following language features are currently transpiled, but some edge cases mi
 * Visibility modifiers
 * Basic lambdas / closures
 
-See also the testcases in [Kotlin](/test-src) or the generated [Swift](/test-dest) files.
+See also the [testcases in Kotlin](/test-src) and the [generated Swift](/test-dest) files.
 
 ### Unsupported features ###
 

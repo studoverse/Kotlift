@@ -13,7 +13,7 @@ public class Empty2 {
 }
 
 public class Thing {
-    init(name: String, height: Int, width: Int, cool: Bool) {
+    init(name: String, height: Int32, width: Int32, cool: Bool) {
 
     }
 }
@@ -25,7 +25,7 @@ public class Customer {
 }
 
 public class Thing2 {
-  init(name: String, height: Int, width: Int, cool: Bool) {
+  init(name: String, height: Int32, width: Int32, cool: Bool) {
   }
 }
 

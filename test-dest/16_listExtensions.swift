@@ -21,16 +21,16 @@ func avg() -> Double {
 
 public class Person {
   let name: String
-  let age: Int
+  let age: Int32
 
-  init(name: String, age: Int) {
+  init(name: String, age: Int32) {
     self.name = name
     self.age = age
   }
 }
 
 extension Array where Element : Person {
-func countAdults() -> Int {
+func countAdults() -> Int32 {
   var adultCounter = 0
   for person in self {
     if person.age >= 18 {

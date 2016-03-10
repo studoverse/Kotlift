@@ -9,7 +9,7 @@ func main(args: [String]) {
     cases(4)
 }
 
-func cases(x: Int) {
+func cases(x: Int32) {
     switch x {
         case 1: print("x == 1")
         case 2: print("x == 2")

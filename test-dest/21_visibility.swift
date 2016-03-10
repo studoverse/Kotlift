@@ -18,25 +18,25 @@ internal class Outer {
   internal let n = Nested()
 
   internal class Nested {
-    internal let e: Int = 5
+    internal let e: Int32 = 5
     init() {
       print("Nested init")
     }
   }
 
-  private func o() -> Int {
+  private func o() -> Int32 {
     return 6
   }
-  internal func p() -> Int {
+  internal func p() -> Int32 {
     return 7
   }
-  internal func q() -> Int {
+  internal func q() -> Int32 {
     return 8
   }
-  func r() -> Int {
+  func r() -> Int32 {
     return 9
   }
-  public func s() -> Int {
+  public func s() -> Int32 {
     return 10
   }
 }

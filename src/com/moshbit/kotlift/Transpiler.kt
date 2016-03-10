@@ -353,9 +353,17 @@ class Transpiler(val replacements: List<Replacement>) {
       // Remove .toString()
       line = line.replace(".toString()", "")
 
+      // Math.abs --> abs (same for all other functions in Math package)
+      line = line.replace("Math.", "")
+
       // Float --> Double
       while (line.matches(Regex("(.*[^A-Za-z0-9_])([0-9]+)(\\.[0-9]*)?f([^A-Za-z0-9_].*|\\Z)"))) {
         line = line.replace(Regex("(.*[^A-Za-z0-9_])([0-9]+)(\\.[0-9]*)?f([^A-Za-z0-9_].*|\\Z)"), "$1$2$3$4")
+      }
+
+      // 123L --> 123
+      while (line.matches(Regex("(.*[^A-Za-z0-9_])([0-9]+)L([^A-Za-z0-9_].*|\\Z)"))) {
+        line = line.replace(Regex("(.*[^A-Za-z0-9_])([0-9]+)L([^A-Za-z0-9_].*|\\Z)"), "$1$2$3")
       }
 
       // Remove package

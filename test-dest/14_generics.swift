@@ -21,7 +21,7 @@ public class BigBox<T> {
 }
 
 func main(args: [String]) {
-  let box: Box<Int> = Box<Int>(t: 1)
+  let box: Box<Int32> = Box<Int32>(t: 1)
   print(box)
 
   let box2 = Box(t: 2)

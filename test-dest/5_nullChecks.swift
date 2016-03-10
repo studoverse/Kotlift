@@ -4,11 +4,11 @@
  */
 
 // Return nil if str does not hold a number
-func parseInt(str: String) -> Int? {
+func parseInt(str: String) -> Int32? {
   do {
     return try Integer.parseInt(str)
   } catch {
-    print("One of the arguments isn't Int")
+    print("One of the arguments isn't Int32")
   }
   return nil
 }

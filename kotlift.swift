@@ -41,3 +41,81 @@ func / (lhs: Int, rhs: Double) -> Double {
 protocol Addable {}
 extension Int: Addable {}
 extension Double: Addable {}
+
+
+func + (a: Int, b: Double) -> Double {
+  return Double(a) + b
+}
+func + (a: Double, b: Int) -> Double {
+  return Double(b) + a
+}
+
+func + (a: Int64, b: Double) -> Double {
+  return Double(a) + b
+}
+func + (a: Double, b: Int64) -> Double {
+  return Double(b) + a
+}
+
+func + (a: Int32, b: Double) -> Double {
+  return Double(a) + b
+}
+func + (a: Double, b: Int32) -> Double {
+  return Double(b) + a
+}
+
+func + (a: Int16, b: Double) -> Double {
+  return Double(a) + b
+}
+func + (a: Double, b: Int16) -> Double {
+  return Double(b) + a
+}
+
+func + (a: Int8, b: Double) -> Double {
+  return Double(a) + b
+}
+func + (a: Double, b: Int8) -> Double {
+  return Double(b) + a
+}
+
+func == (a: Int32, b: Int) -> Bool {
+  return Int(a) == b
+}
+func == (a: Int, b: Int32) -> Bool {
+  return Int(b) == a
+}
+
+func == (a: Int32, b: Int64) -> Bool {
+  return Int64(a) == b
+}
+func == (a: Int64, b: Int32) -> Bool {
+  return Int64(b) == a
+}
+
+func == (a: Int, b: Int64) -> Bool {
+  return Int64(a) == b
+}
+func == (a: Int64, b: Int) -> Bool {
+  return Int64(b) == a
+}
+
+func != (a: Int32, b: Int) -> Bool {
+  return Int(a) != b
+}
+func != (a: Int, b: Int32) -> Bool {
+  return Int(b) != a
+}
+
+func != (a: Int32, b: Int64) -> Bool {
+  return Int64(a) != b
+}
+func != (a: Int64, b: Int32) -> Bool {
+  return Int64(b) != a
+}
+
+func != (a: Int, b: Int64) -> Bool {
+  return Int64(a) != b
+}
+func != (a: Int64, b: Int) -> Bool {
+  return Int64(b) != a
+}
