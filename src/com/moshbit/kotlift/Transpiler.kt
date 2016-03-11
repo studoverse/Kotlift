@@ -327,6 +327,11 @@ class Transpiler(val replacements: List<Replacement>) {
       }
 
 
+      // Translate elvis operator if (a) b else c --> a ? b : c
+      while (line.matches(Regex("(\\s*)(.*)if \\((.*)\\) (.*) else (.*)"))) {
+        line = line.replace(Regex("(\\s*)(.*)if \\((.*)\\) (.*) else (.*)"), "$1$2$3 ? $4 : $5")
+      }
+
       // Translate if (no round brackets in swift)
       line = line.replace(Regex("(\\s*)(if|for|switch|while) \\((.*)\\)(.*)"), "$1$2 $3$4")
 
@@ -535,6 +540,20 @@ class Transpiler(val replacements: List<Replacement>) {
       while (line.matches(Regex("(.*\\{.*)it(.*\\}.*)"))) {
         line = line.replace(Regex("(.*\\{.*)it(.*\\}.*)"), "$1\\$0$2")
       }
+
+
+      // Null coalescing: ?: --> ??
+      line = line.replace(" ?: ", " ?? ")
+
+      // Return null on elvis operator
+      if (line.matches(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return nil"))) {
+        val indent = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return nil"), "$1")
+        val nullVar = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return nil"), "$3")
+        line = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return nil"), "$1$2$3 = $4 ?? nil")
+        // Add return statement
+        nextOutputLine = "${indent}if $nullVar == nil { return nil } // Return from elvis operator"
+      }
+
 
       dest.add(line)
 

@@ -26,6 +26,7 @@ The following language features are currently transpiled, but some edge cases mi
 * Variables, arrays and lists
 * Basic types (String, Boolean, Double, Float, Long, Int, Short, Byte)
 * Functions with parameters
+* If and elvis operator
 * For and while loops
 * String interpolation
 * Main function calling (in Swift playground)
@@ -35,6 +36,7 @@ The following language features are currently transpiled, but some edge cases mi
 * Casting
 * Ranges and iteration
 * When / switch case
+* Null coalescing
 * Classes with none or one constructor
 * Inheritance
 * Abstract classes
@@ -60,6 +62,7 @@ The following features are currently unsupported, but are ordered by likelihood 
 * Line-wrapped function and class definitions
 * Unnamed constructor parameter
 * Unnamed function parameters (except the first one)
+* Auto inferred function return types
 * Finally / defer
 * ...
 
