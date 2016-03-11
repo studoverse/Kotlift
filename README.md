@@ -48,6 +48,7 @@ The following language features are currently transpiled, but some edge cases mi
 * Visibility modifiers
 * Basic lambdas / closures
 * Maps / dictionaries
+* Sets
 
 See also the [testcases in Kotlin](/test-src) and the [generated Swift](/test-dest) files.
 
@@ -55,7 +56,6 @@ See also the [testcases in Kotlin](/test-src) and the [generated Swift](/test-de
 
 The following features are currently unsupported, but are ordered by likelihood to be implemented soon:
 
-* Sets
 * Enums
 * (Data) classes, functions or getters & setters with opening & closing brackets in same line or without brackets at all
 * Line-wrapped function and class definitions

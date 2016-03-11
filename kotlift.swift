@@ -5,6 +5,11 @@ extension Array {
   mutating func add(element: Element) {
     self.append(element)
   }
+  mutating func addAll(other: Array) {
+    for element in other {
+      self.append(element)
+    }
+  }
 }
 
 extension Dictionary {
@@ -12,16 +17,31 @@ extension Dictionary {
   mutating func put(key: Key, _ value: Value) {
     self[key] = value
   }
+  mutating func putAll(other: Dictionary) {
+    for (key, value) in other {
+      self.updateValue(value, forKey: key)
+    }
+  }
   func isEmpty() -> Bool {
     return self.isEmpty
   }
   mutating func remove(key: Key) -> Value? {
     return self.removeValueForKey(key)
   }
-  mutating func putAll(other: Dictionary) {
-    for (key, value) in other {
-      self.updateValue(value, forKey: key)
+}
+
+extension Set {
+  var size: Int { return self.count }
+  mutating func add(element: Element) {
+    self.insert(element)
+  }
+  mutating func addAll(other: Set) {
+    for element in other {
+      self.insert(element)
     }
+  }
+  func isEmpty() -> Bool {
+    return self.isEmpty
   }
 }
 

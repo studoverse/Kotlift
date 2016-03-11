@@ -418,7 +418,6 @@ class Transpiler(val replacements: List<Replacement>) {
         line = line.replace(Regex("(.*)List<(.*)>(.*)"), "$1Array<$2>$3")
       }
 
-
       // Translate Maps --> [:]
       line = line.replace("LinkedHashMap", "HashMap")
       if (line.matches(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.*),(.*)>\\(\\)(.*)"))) {
@@ -430,6 +429,17 @@ class Transpiler(val replacements: List<Replacement>) {
             .map { it.replace(Regex("(.*?)(\\),)?\\)?"), "$1") }
             .joinToString(separator = ", ", transform = { it.trim().replace(", ", ": ") })
         line = line.replace(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"), "$1[$pairList]$4")
+      }
+
+
+      // Translate Sets
+      line = line.replace("LinkedHashSet", "HashSet")
+      if (line.matches(Regex("(.*)(emptySet|HashSet|LinkedHashSet)<(.*)>\\(\\)(.*)"))) {
+        line = line.replace(Regex("(.*)(emptySet|HashSet|LinkedHashSet)<(.*)>\\(\\)(.*)"), "$1Set<$3>()$4")
+      }
+      if (line.matches(Regex("(.*)(hashSet|mutableSet|linkedSet|set)Of\\((.*)\\)(.*)"))) {
+        line = line
+            .replace(Regex("(.*)(hashSet|mutableSet|linkedSet|set)Of\\((.*)\\)(.*)"), "$1Set(arrayLiteral: $3)$4")
       }
 
       // Classes
