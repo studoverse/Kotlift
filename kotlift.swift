@@ -7,6 +7,13 @@ extension Array {
   }
 }
 
+extension Dictionary {
+  var size: Int { return self.count }
+  mutating func put(key: Key, _ value: Value) {
+    self[key] = value
+  }
+}
+
 extension String {
   var length: Int { return characters.count }
 }
