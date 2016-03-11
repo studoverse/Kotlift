@@ -405,21 +405,14 @@ class Transpiler(val replacements: List<Replacement>) {
       }
 
 
-      // TODO @V Merge following 5 (like in maps)
       // Translate arrayListOf -> []
-      if (line.matches(Regex("(.*)arrayListOf<(.*)>(.*)"))) {
-        line = line.replace(Regex("(.*)arrayListOf<(.*)>(.*)"), "$1[$2]$3")
-      }
       if (line.matches(Regex("(.*)arrayListOf?\\((.*)\\)"))) {
         line = line.replace(Regex("(.*)arrayListOf\\((.*)\\)"), "$1[$2]")
       }
 
       // Translate List, ArrayList and LinkedList --> Array
-      if (line.matches(Regex("(.*)ArrayList<(.*)>(.*)"))) {
-        line = line.replace(Regex("(.*)ArrayList<(.*)>(.*)"), "$1[$2]$3")
-      }
-      if (line.matches(Regex("(.*)LinkedList<(.*)>(.*)"))) {
-        line = line.replace(Regex("(.*)LinkedList<(.*)>(.*)"), "$1[$2]$3")
+      if (line.matches(Regex("(.*)(ArrayList|LinkedList|arrayListOf)<(.*)>(.*)"))) {
+        line = line.replace(Regex("(.*)(ArrayList|LinkedList|arrayListOf)<(.*)>(.*)"), "$1[$3]$4")
       }
       if (line.matches(Regex("(.*)List<(.*)>(.*)"))) {
         line = line.replace(Regex("(.*)List<(.*)>(.*)"), "$1Array<$2>$3")
@@ -432,10 +425,11 @@ class Transpiler(val replacements: List<Replacement>) {
         line = line.replace(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.*),(.*)>\\(\\)(.*)"), "$1[$3:$4]()$5")
       }
       if (line.matches(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"))) {
-        val pairList = line.replace(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"), "$3").split("Pair(").filter { it.length > 2 }
+        val pairList = line.replace(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"), "$3")
+            .split("Pair(").filter { it.length > 2 }
             .map { it.replace(Regex("(.*?)(\\),)?\\)?"), "$1") }
-        var swiftPairList = pairList.joinToString(separator = ", ", transform = { it.trim().replace(", ", ": ") } )
-        line = line.replace(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"), "$1[$swiftPairList]$4")
+            .joinToString(separator = ", ", transform = { it.trim().replace(", ", ": ") })
+        line = line.replace(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"), "$1[$pairList]$4")
       }
 
       // Classes
