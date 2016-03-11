@@ -47,6 +47,7 @@ The following language features are currently transpiled, but some edge cases mi
 * Properties with getters and setters / backing fields / computed properties
 * Visibility modifiers
 * Basic lambdas / closures
+* Maps / dictionaries
 
 See also the [testcases in Kotlin](/test-src) and the [generated Swift](/test-dest) files.
 
@@ -54,7 +55,7 @@ See also the [testcases in Kotlin](/test-src) and the [generated Swift](/test-de
 
 The following features are currently unsupported, but are ordered by likelihood to be implemented soon:
 
-* Maps / dictionaries and sets
+* Sets
 * Enums
 * (Data) classes, functions or getters & setters with opening & closing brackets in same line or without brackets at all
 * Line-wrapped function and class definitions

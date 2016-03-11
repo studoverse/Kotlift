@@ -29,8 +29,8 @@ func myMax<T>(collection: Array<T>, less: (T, T) -> Bool) -> T? {
 }
 
 func main(args: [String]) {
-  let ints = [1, 2, 3, 4, 10, 0]
-  let ints2 = [1, 2, 3, 4, 10, 0]
+  var ints = [1, 2, 3, 4, 10, 0]
+  var ints2 = [1, 2, 3, 4, 10, 0]
   let doubled1 = ints.myMap { element in element * 2 }
   let doubled2 = ints.myMap { $0 * 2 }
 

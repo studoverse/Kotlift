@@ -405,6 +405,7 @@ class Transpiler(val replacements: List<Replacement>) {
       }
 
 
+      // TODO @V Merge following 5 (like in maps)
       // Translate arrayListOf -> []
       if (line.matches(Regex("(.*)arrayListOf<(.*)>(.*)"))) {
         line = line.replace(Regex("(.*)arrayListOf<(.*)>(.*)"), "$1[$2]$3")
@@ -424,6 +425,18 @@ class Transpiler(val replacements: List<Replacement>) {
         line = line.replace(Regex("(.*)List<(.*)>(.*)"), "$1Array<$2>$3")
       }
 
+
+      // Translate Maps --> [:]
+      line = line.replace("LinkedHashMap", "HashMap")
+      if (line.matches(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.*),(.*)>\\(\\)(.*)"))) {
+        line = line.replace(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.*),(.*)>\\(\\)(.*)"), "$1[$3:$4]()$5")
+      }
+      if (line.matches(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"))) {
+        val pairList = line.replace(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"), "$3").split("Pair(").filter { it.length > 2 }
+            .map { it.replace(Regex("(.*?)(\\),)?\\)?"), "$1") }
+        var swiftPairList = pairList.joinToString(separator = ", ", transform = { it.trim().replace(", ", ": ") } )
+        line = line.replace(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"), "$1[$swiftPairList]$4")
+      }
 
       // Classes
       // Declaration
@@ -493,9 +506,9 @@ class Transpiler(val replacements: List<Replacement>) {
       }
 
 
-      // Arrays should be always mutable, as mutation of elements changes array (in contrast to Kotlin lists)
-      if (line.matches(Regex("(\\s*)let (.* = \\[.*\\]\\(\\))"))) {
-        line = line.replace((Regex("(\\s*)let (.* = \\[.*\\]\\(\\))")), "$1var $2")
+      // Arrays/Dictionaries should be always mutable, as mutation of elements changes array (in contrast to Kotlin)
+      if (line.matches(Regex("(\\s*)let (.* = \\[.*\\]\\(?\\)?)"))) {
+        line = line.replace((Regex("(\\s*)let (.* = \\[.*\\]\\(?\\)?)")), "$1var $2")
       }
 
 

@@ -12,6 +12,17 @@ extension Dictionary {
   mutating func put(key: Key, _ value: Value) {
     self[key] = value
   }
+  func isEmpty() -> Bool {
+    return self.isEmpty
+  }
+  mutating func remove(key: Key) -> Value? {
+    return self.removeValueForKey(key)
+  }
+  mutating func putAll(other: Dictionary) {
+    for (key, value) in other {
+      self.updateValue(value, forKey: key)
+    }
+  }
 }
 
 extension String {
