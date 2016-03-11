@@ -31,12 +31,11 @@ The following language features are currently transpiled, but some edge cases mi
 * String interpolation
 * Main function calling (in Swift playground)
 * Custom rewrites (comment the preceding line with `// SWIFT: this.will(be.replaced)` to replace the following line)
-* Basic null safety
+* Null safety, safe calls, null coalescing
 * Basic try-catch
 * Casting
 * Ranges and iteration
 * When / switch case
-* Null coalescing
 * Classes with none or one constructor
 * Inheritance
 * Abstract classes
@@ -55,7 +54,6 @@ See also the [testcases in Kotlin](/test-src) and the [generated Swift](/test-de
 
 The following features are currently unsupported, but are ordered by likelihood to be implemented soon:
 
-* Force optional unwrapping
 * Maps / dictionaries and sets
 * Enums
 * (Data) classes, functions or getters & setters with opening & closing brackets in same line or without brackets at all
@@ -64,6 +62,7 @@ The following features are currently unsupported, but are ordered by likelihood 
 * Unnamed function parameters (except the first one)
 * Auto inferred function return types
 * Finally / defer
+* Smart casts
 * ...
 
 ### Usage ###

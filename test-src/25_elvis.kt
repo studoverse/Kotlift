@@ -19,6 +19,7 @@ fun foo(node: Node): String? {
 fun main(args: Array<String>) {
   // Test simple elvis operator
   val b: String? = "asdf"
+  // SWIFT: let c = b != nil ? b!.length : -1
   val c = if (b != null) b.length else -1
   val d = b?.length ?: -1
   val error = if (c != 4 || d != 4) "ERROR" else "OK"

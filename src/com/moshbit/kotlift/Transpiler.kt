@@ -542,6 +542,10 @@ class Transpiler(val replacements: List<Replacement>) {
       }
 
 
+      // Force optional unwrapping: !! -> !
+      line = line.replace("!!", "!")
+
+
       // Null coalescing: ?: --> ??
       line = line.replace(" ?: ", " ?? ")
 
