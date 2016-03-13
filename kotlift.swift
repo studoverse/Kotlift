@@ -47,6 +47,21 @@ extension Set {
 
 extension String {
   var length: Int { return characters.count }
+  
+  func substring(startIndex: Int, endIndex: Int) -> String {
+    let start = self.startIndex.advancedBy(startIndex)
+    let end = self.startIndex.advancedBy(endIndex)
+    return self.substringWithRange(Range<String.Index>(start: start, end: end))
+  }
+  
+  func contains(string: String) -> Bool {
+    return self.rangeOfString(string) != nil
+  }
+
+  func replace(target: String, _ withString: String) -> String {
+    return self.stringByReplacingOccurrencesOfString(target, withString: withString,
+      options: NSStringCompareOptions.LiteralSearch, range: nil)
+  }
 }
 
 enum Exception: ErrorType {
