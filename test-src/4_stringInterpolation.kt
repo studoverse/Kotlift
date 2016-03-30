@@ -13,4 +13,5 @@ fun main(args: Array<String>) {
     println("multiple: $name, $name2 $name2")
     println("multiple2: ${name}, ${name2} $name2")
     println("multiple3: ${name}, ${name2} ${name2}")
+    println("$123 is not a variable, $= and $ are also not a valid name")
 }

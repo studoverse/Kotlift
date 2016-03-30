@@ -341,10 +341,9 @@ class Transpiler(val replacements: List<Replacement>) {
         line = line.replace(Regex("(.*)\\\$\\{(.*)\\}(.*)"), "$1\\\\($2)$3")
       }
       // Translate string interpolation: $value
-      while (line.matches(Regex("(.*)\\\$([A-Za-z0-9_]*)([^A-Za-z0-9_].*)"))) {
-        line = line.replace(Regex("(.*)\\\$([A-Za-z0-9_]*)([^A-Za-z0-9_].*)"), "$1\\\\($2)$3")
+      while (line.matches(Regex("(.*)\\\$([A-Za-z_][A-Za-z0-9_]*)([^A-Za-z0-9_].*)"))) {
+        line = line.replace(Regex("(.*)\\\$([A-Za-z_][A-Za-z0-9_]*)([^A-Za-z0-9_].*)"), "$1\\\\($2)$3")
       }
-
 
       // Replacements
       replacements.forEach {
