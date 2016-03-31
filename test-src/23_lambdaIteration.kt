@@ -6,6 +6,7 @@
 20
 ["1€", "2€", "3€", "4€", "10€", "0€"]
 ["1€", "2€", "3€", "4€", "10€", "0€"]
+1234100
 */
 
 // SWIFT: extension Array {
@@ -48,4 +49,9 @@ fun main(args: Array<String>) {
   // Use stdlib
   println(ints.map { "$it€"} )
   println(ints.map({"$it€"}))
+
+  // With parameter
+  ints.forEach { intVal ->
+    print(intVal)
+  }
 }

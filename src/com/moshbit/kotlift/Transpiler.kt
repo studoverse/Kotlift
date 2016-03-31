@@ -548,9 +548,9 @@ class Transpiler(val replacements: List<Replacement>) {
       }
 
 
-      // Lambdas: { x -> x } --> { x in x }
-      while (line.matches(Regex("(.*\\{.*) -> (.*\\}.*)"))) {
-        line = line.replace(Regex("(.*\\{.*) -> (.*\\}.*)"), "$1 in $2")
+      // Lambdas: { x -> x } --> { x in x }   or  { x ->\n --> { x in\n
+      while (line.matches(Regex("(.*\\{.*) ->( (.*\\}.*)|)"))) {
+        line = line.replace(Regex("(.*\\{.*) ->( (.*\\}.*)|)"), "$1 in$2")
       }
       // Lambdas: { it } --> { $0 }
       while (line.matches(Regex("(.*\\{.*)it(.*\\}.*)"))) {

@@ -6,6 +6,7 @@
 20
 ["1€", "2€", "3€", "4€", "10€", "0€"]
 ["1€", "2€", "3€", "4€", "10€", "0€"]
+1234100
 */
 
 extension Array {
@@ -44,6 +45,11 @@ func main(args: [String]) {
   // Use stdlib
   print(ints.map { "\($0)€"} )
   print(ints.map({"\($0)€"}))
+
+  // With parameter
+  ints.forEach { intVal in
+    print(intVal)
+  }
 }
 
 main([])
