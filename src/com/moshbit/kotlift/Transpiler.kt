@@ -565,13 +565,15 @@ class Transpiler(val replacements: List<Replacement>) {
       // Null coalescing: ?: --> ??
       line = line.replace(" ?: ", " ?? ")
 
-      // Return null on elvis operator
-      if (line.matches(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return nil"))) {
-        val indent = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return nil"), "$1")
-        val nullVar = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return nil"), "$3")
-        line = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return nil"), "$1$2$3 = $4 ?? nil")
+      // Return null on elvis operator with smart cast
+      if (line.matches(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_]*)"))) {
+        val indent = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_]*)"), "$1")
+        val nullVar = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_]*)"), "$3")
+        val returnVal = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_]*)"), "$5")
+        line = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_]*)"), "$1$2$3Optional = $4 ?? nil")
         // Add return statement
-        nextOutputLine = "${indent}if $nullVar == nil { return nil } // Return from elvis operator"
+        nextOutputLine = "${indent}if ${nullVar}Optional == nil { return $returnVal } // Return from elvis operator\n" +
+            "${indent}let $nullVar = ${nullVar}Optional! // Smart cast"
       }
 
 

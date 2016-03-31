@@ -17,8 +17,9 @@ public class Node {
 }
 
 func foo(node: Node) -> String? {
-  let parent = node.getParent() ?? nil
-  if parent == nil { return nil } // Return from elvis operator
+  let parentOptional = node.getParent() ?? nil
+  if parentOptional == nil { return nil } // Return from elvis operator
+  let parent = parentOptional! // Smart cast
   let name = node.getName() ?? "THROW IS CURRENTLY NOT SUPPORTED" //throw IllegalArgumentException("name expected")
 
   return "foo returns \(name)"
