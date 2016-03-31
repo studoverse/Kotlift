@@ -472,7 +472,8 @@ class Transpiler(val replacements: List<Replacement>) {
 
 
         // Inheritance
-        val derivedClasses = line.replace(R_CLASS, "$8")
+        var derivedClasses = line.replace(R_CLASS, "$8")
+            .replace(Regex(": ([A-Za-z0-9_]+)(((\\().*(\\)))|())(.*)"), ": $1$4$5$7") // Remove arguments
         line = line.replace(R_CLASS, "$1$2class $4$5${derivedClasses.replace("()", "")} {")
             .replace("open ", "").replace("abstract ", "").replace("data ", "")
 
@@ -566,14 +567,15 @@ class Transpiler(val replacements: List<Replacement>) {
       line = line.replace(" ?: ", " ?? ")
 
       // Return null on elvis operator with smart cast
-      if (line.matches(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_]*)"))) {
-        val indent = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_]*)"), "$1")
-        val nullVar = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_]*)"), "$3")
-        val returnVal = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_]*)"), "$5")
-        line = line.replace(Regex("(\\s*)(.* )([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_]*)"), "$1$2$3Optional = $4 ?? nil")
+      if (line.matches(Regex("(\\s*)(let|var) ([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"))) {
+        val indent = line.replace(Regex("(\\s*)(let|var) ([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"), "$1")
+        val keyword = line.replace(Regex("(\\s*)(let|var) ([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"), "$2")
+        val nullVar = line.replace(Regex("(\\s*)(let|var) ([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"), "$3")
+        val returnVal = line.replace(Regex("(\\s*)(let|var) ([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"), "$5")
+        line = line.replace(Regex("(\\s*)(let|var) ([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"), "$1let $3Optional = $4 ?? nil")
         // Add return statement
         nextOutputLine = "${indent}if ${nullVar}Optional == nil { return $returnVal } // Return from elvis operator\n" +
-            "${indent}let $nullVar = ${nullVar}Optional! // Smart cast"
+            "$indent$keyword $nullVar = ${nullVar}Optional! // Smart cast"
       }
 
 

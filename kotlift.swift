@@ -50,20 +50,25 @@ extension Set {
 
 extension String {
   var length: Int { return characters.count }
-  
-  func substring(startIndex: Int, endIndex: Int) -> String {
+  func substring(startIndex: Int, _ endIndex: Int) -> String {
     let start = self.startIndex.advancedBy(startIndex)
     let end = self.startIndex.advancedBy(endIndex)
     return self.substringWithRange(Range<String.Index>(start: start, end: end))
   }
-  
+  func substring(startIndex: Int) -> String {
+    return substring(startIndex, self.length)
+  }
   func contains(string: String) -> Bool {
     return self.rangeOfString(string) != nil
   }
-
   func replace(target: String, _ withString: String) -> String {
-    return self.stringByReplacingOccurrencesOfString(target, withString: withString,
-      options: NSStringCompareOptions.LiteralSearch, range: nil)
+    return self.stringByReplacingOccurrencesOfString(target,
+                                                     withString: withString,
+                                                     options: NSStringCompareOptions.LiteralSearch,
+                                                     range: nil)
+  }
+  func isEmpty() -> Bool {
+    return isEmpty
   }
 }
 
