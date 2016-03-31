@@ -10,6 +10,9 @@ extension Array {
       self.append(element)
     }
   }
+  func get(index: Int) -> Element {
+    return self[index]
+  }
 }
 
 extension Dictionary {
