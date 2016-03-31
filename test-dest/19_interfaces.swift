@@ -42,7 +42,7 @@ public class Child: Parent, MyInterface {
 // Abstract Interface + Inheritance
 
 public class AbstractParent {
-  func three() -> Int {
+  func three() -> Int32 {
     fatalError("Method is abstract")
   }
 

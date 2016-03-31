@@ -19,7 +19,7 @@ public func myMap<R>(transform: (Element) -> R) -> Array<R> {
 }
 }
 
-func myMax<T>(collection: Array<T>, less: (T, T) -> Bool) -> T? {
+func myMax<T>(collection: [T], less: (T, T) -> Bool) -> T? {
   var max: T? = nil
   for it in collection {
     if (max == nil || less(max!, it)) {

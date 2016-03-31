@@ -227,9 +227,57 @@ class Transpiler(val replacements: List<Replacement>) {
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       // Start with translations
 
+      // Replacements
+      replacements.forEach {
+        val regex = Regex("(.*[^A-Za-z0-9_]|)${it.from}([^A-Za-z0-9_].*|\\Z)")
+        while (line.matches(regex)) {
+          line = line.replace(regex, "$1${it.to}$2")
+        }
+      }
+
       // Translate arrays
       while (line.matches(Regex("(.*)Array<([A-Za-z0-9_]+)>(.*)"))) {
         line = line.replace(Regex("(.*)Array<([A-Za-z0-9_]+)>(.*)"), "$1[$2]$3")
+      }
+
+      // Translate arrayListOf -> []
+      while (line.matches(Regex("(.*)arrayListOf?\\((.*)\\)"))) {
+        line = line.replace(Regex("(.*)arrayListOf\\((.*)\\)"), "$1[$2]")
+      }
+
+      // Translate List, ArrayList and LinkedList --> Array
+      while (line.matches(Regex("(.*)(ArrayList|LinkedList|arrayListOf)<(.*)>(.*)"))) {
+        line = line.replace(Regex("(.*)(ArrayList|LinkedList|arrayListOf)<(.*)>(.*)"), "$1[$3]$4")
+      }
+      while (line.matches(Regex("(.*)List<(.*)>(.*)"))) {
+        line = line.replace(Regex("(.*)List<(.*)>(.*)"), "$1Array<$2>$3")
+      }
+
+      // Translate Maps --> [:]
+      line = line.replace("LinkedHashMap", "HashMap").replace("ArrayMap", "HashMap")
+      while (line.matches(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.*),(.*)>\\(\\)(.*)"))) {
+        line = line.replace(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.*),(.*)>\\(\\)(.*)"), "$1[$3:$4]()$5")
+      }
+      while (line.matches(Regex("(.*)Map<(.*),(.*)>(.*)"))) {
+        line = line.replace(Regex("(.*)Map<(.*),(.*)>(.*)"), "$1[$2:$3]$4")
+      }
+      while (line.matches(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"))) {
+        val pairList = line.replace(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"), "$3")
+            .split("Pair(").filter { it.length > 2 }
+            .map { it.replace(Regex("(.*?)(\\),)?\\)?"), "$1") }
+            .joinToString(separator = ", ", transform = { it.trim().replace(", ", ": ") })
+        line = line.replace(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"), "$1[$pairList]$4")
+      }
+
+
+      // Translate Sets
+      line = line.replace("LinkedHashSet", "HashSet").replace("ArraySet", "HashSet")
+      while (line.matches(Regex("(.*)(emptySet|HashSet|LinkedHashSet)<(.*)>\\(\\)(.*)"))) {
+        line = line.replace(Regex("(.*)(emptySet|HashSet|LinkedHashSet)<(.*)>\\(\\)(.*)"), "$1Set<$3>()$4")
+      }
+      while (line.matches(Regex("(.*)(hashSet|mutableSet|linkedSet|set)Of\\((.*)\\)(.*)"))) {
+        line = line
+            .replace(Regex("(.*)(hashSet|mutableSet|linkedSet|set)Of\\((.*)\\)(.*)"), "$1Set(arrayLiteral: $3)$4")
       }
 
 
@@ -303,14 +351,14 @@ class Transpiler(val replacements: List<Replacement>) {
 
 
       // Properties
-      if (line.matches(Regex("\\s*(var|val) ([A-Za-z0-9_]+).*"))) {
+      if (line.matches(Regex("\\s*(var|let) ([A-Za-z0-9_]+).*"))) {
         // Append to classes/interface list
         for (index in structureTree.count() - 1 downTo 0) {
           if (structureTree[index] is Class) {
-            classesList.last.properties.add(line.replace(Regex("\\s*(var|val) ([A-Za-z0-9_]+).*"), "$2"))
+            classesList.last.properties.add(line.replace(Regex("\\s*(var|let) ([A-Za-z0-9_]+).*"), "$2"))
             break
           } else if (structureTree[index] is Interface) {
-            interfacesList.last.properties.add(line.replace(Regex("\\s*(var|val) ([A-Za-z0-9_]+).*"), "$2"))
+            interfacesList.last.properties.add(line.replace(Regex("\\s*(var|let) ([A-Za-z0-9_]+).*"), "$2"))
             break
           }
         }
@@ -318,7 +366,7 @@ class Transpiler(val replacements: List<Replacement>) {
         // Custom getter+setter / computed properties
         if (nextInputLine.matches(Regex("\\s*(get|set)\\(.*"))) {
           // In swift computed properties must always be var
-          line = line.replace("val ", "var ")
+          line = line.replace("let ", "var ")
           line += " {"
 
           // Add closing bracket
@@ -343,14 +391,6 @@ class Transpiler(val replacements: List<Replacement>) {
       // Translate string interpolation: $value
       while (line.matches(Regex("(.*)\\\$([A-Za-z_][A-Za-z0-9_]*)([^A-Za-z0-9_].*)"))) {
         line = line.replace(Regex("(.*)\\\$([A-Za-z_][A-Za-z0-9_]*)([^A-Za-z0-9_].*)"), "$1\\\\($2)$3")
-      }
-
-      // Replacements
-      replacements.forEach {
-        val regex = Regex("(.*[^A-Za-z0-9_]|)${it.from}([^A-Za-z0-9_].*|\\Z)")
-        while (line.matches(regex)) {
-          line = line.replace(regex, "$1${it.to}$2")
-        }
       }
 
 
@@ -403,43 +443,6 @@ class Transpiler(val replacements: List<Replacement>) {
         line = line.replace("try", "do")
       }
 
-
-      // Translate arrayListOf -> []
-      if (line.matches(Regex("(.*)arrayListOf?\\((.*)\\)"))) {
-        line = line.replace(Regex("(.*)arrayListOf\\((.*)\\)"), "$1[$2]")
-      }
-
-      // Translate List, ArrayList and LinkedList --> Array
-      if (line.matches(Regex("(.*)(ArrayList|LinkedList|arrayListOf)<(.*)>(.*)"))) {
-        line = line.replace(Regex("(.*)(ArrayList|LinkedList|arrayListOf)<(.*)>(.*)"), "$1[$3]$4")
-      }
-      if (line.matches(Regex("(.*)List<(.*)>(.*)"))) {
-        line = line.replace(Regex("(.*)List<(.*)>(.*)"), "$1Array<$2>$3")
-      }
-
-      // Translate Maps --> [:]
-      line = line.replace("LinkedHashMap", "HashMap").replace("ArrayMap", "HashMap")
-      if (line.matches(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.*),(.*)>\\(\\)(.*)"))) {
-        line = line.replace(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.*),(.*)>\\(\\)(.*)"), "$1[$3:$4]()$5")
-      }
-      if (line.matches(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"))) {
-        val pairList = line.replace(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"), "$3")
-            .split("Pair(").filter { it.length > 2 }
-            .map { it.replace(Regex("(.*?)(\\),)?\\)?"), "$1") }
-            .joinToString(separator = ", ", transform = { it.trim().replace(", ", ": ") })
-        line = line.replace(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"), "$1[$pairList]$4")
-      }
-
-
-      // Translate Sets
-      line = line.replace("LinkedHashSet", "HashSet").replace("ArraySet", "HashSet")
-      if (line.matches(Regex("(.*)(emptySet|HashSet|LinkedHashSet)<(.*)>\\(\\)(.*)"))) {
-        line = line.replace(Regex("(.*)(emptySet|HashSet|LinkedHashSet)<(.*)>\\(\\)(.*)"), "$1Set<$3>()$4")
-      }
-      if (line.matches(Regex("(.*)(hashSet|mutableSet|linkedSet|set)Of\\((.*)\\)(.*)"))) {
-        line = line
-            .replace(Regex("(.*)(hashSet|mutableSet|linkedSet|set)Of\\((.*)\\)(.*)"), "$1Set(arrayLiteral: $3)$4")
-      }
 
       // Classes
       // Declaration
