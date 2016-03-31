@@ -49,6 +49,7 @@ The following language features are currently transpiled, but some edge cases mi
 * Basic lambdas / closures
 * Maps / dictionaries
 * Sets
+* Very basic smart casts
 
 See also the [testcases in Kotlin](/test-src) and the [generated Swift](/test-dest) files.
 
@@ -63,7 +64,7 @@ The following features are currently unsupported, but are ordered by likelihood 
 * Unnamed function parameters (except the first one)
 * Auto inferred function return types
 * Finally / defer
-* Smart casts
+* Full support for smart casts
 * ...
 
 ### Usage ###

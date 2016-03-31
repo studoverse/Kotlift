@@ -418,7 +418,7 @@ class Transpiler(val replacements: List<Replacement>) {
       }
 
       // Translate Maps --> [:]
-      line = line.replace("LinkedHashMap", "HashMap")
+      line = line.replace("LinkedHashMap", "HashMap").replace("ArrayMap", "HashMap")
       if (line.matches(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.*),(.*)>\\(\\)(.*)"))) {
         line = line.replace(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.*),(.*)>\\(\\)(.*)"), "$1[$3:$4]()$5")
       }
@@ -432,7 +432,7 @@ class Transpiler(val replacements: List<Replacement>) {
 
 
       // Translate Sets
-      line = line.replace("LinkedHashSet", "HashSet")
+      line = line.replace("LinkedHashSet", "HashSet").replace("ArraySet", "HashSet")
       if (line.matches(Regex("(.*)(emptySet|HashSet|LinkedHashSet)<(.*)>\\(\\)(.*)"))) {
         line = line.replace(Regex("(.*)(emptySet|HashSet|LinkedHashSet)<(.*)>\\(\\)(.*)"), "$1Set<$3>()$4")
       }
@@ -576,6 +576,11 @@ class Transpiler(val replacements: List<Replacement>) {
             "${indent}let $nullVar = ${nullVar}Optional! // Smart cast"
       }
 
+
+      // Smart casts on if-null-checks: if (x != null) --> if let x = x
+      if (line.matches(Regex("(\\s*)if ([A-Za-z_][A-Za-z0-9_]*) != nil \\{"))) {
+        line = line.replace(Regex("(\\s*)if ([A-Za-z_][A-Za-z0-9_]*) != nil \\{"), "$1if let $2 = $2 {")
+      }
 
       dest.add(line)
 
