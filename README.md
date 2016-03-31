@@ -17,7 +17,7 @@ Many functions from the Kotlin stdlib are the same in Swift, therefore less logi
 Kotlift is already used in production by [Moshbit App Design & Development](http://moshbit.com) and will be updated to
 new Kotlin and Swift versions.
 
-Supported versions: Kotlin 1.0.0, Swift 2.1
+Supported versions: Kotlin 1.0.1, Swift 2.2
 
 ### Supported features ###
 
