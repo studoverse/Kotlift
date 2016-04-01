@@ -570,15 +570,15 @@ class Transpiler(val replacements: List<Replacement>) {
       line = line.replace(" ?: ", " ?? ")
 
       // Return null on elvis operator with smart cast
-      if (line.matches(Regex("(\\s*)(let|var) ([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"))) {
-        val indent = line.replace(Regex("(\\s*)(let|var) ([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"), "$1")
-        val keyword = line.replace(Regex("(\\s*)(let|var) ([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"), "$2")
-        val nullVar = line.replace(Regex("(\\s*)(let|var) ([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"), "$3")
-        val returnVal = line.replace(Regex("(\\s*)(let|var) ([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"), "$5")
-        line = line.replace(Regex("(\\s*)(let|var) ([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"), "$1let $3Optional = $4 ?? nil")
+      if (line.matches(Regex("(\\s*)(let |var |)([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"))) {
+        val indent = line.replace(Regex("(\\s*)(let |var |)([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.\\/\\)]*)"), "$1")
+        val keyword = line.replace(Regex("(\\s*)(let |var |)([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.\\/\\)]*)"), "$2")
+        val nullVar = line.replace(Regex("(\\s*)(let |var |)([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.\\/\\)]*)"), "$3")
+        val returnVal = line.replace(Regex("(\\s*)(let |var |)([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.\\/\\)]*)"), "$5")
+        line = line.replace(Regex("(\\s*)(let |var )([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.\\/\\)]*)"), "$1let $3Optional = $4 ?? nil")
         // Add return statement
-        nextOutputLine = "${indent}if ${nullVar}Optional == nil { return $returnVal } // Return from elvis operator\n" +
-            "$indent$keyword $nullVar = ${nullVar}Optional! // Smart cast"
+        nextOutputLine = "${indent}if ${nullVar}Optional == nil { return $returnVal } // Kotlift generated return from elvis operator\n" +
+            "$indent$keyword$nullVar = ${nullVar}Optional! // Kotlift generated smart cast"
       }
 
 

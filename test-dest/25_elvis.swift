@@ -18,8 +18,8 @@ public class Node {
 
 func foo(node: Node) -> String? {
   let parentOptional = node.getParent() ?? nil
-  if parentOptional == nil { return nil } // Return from elvis operator
-  let parent = parentOptional! // Smart cast
+  if parentOptional == nil { return nil } // Kotlift generated return from elvis operator
+  let parent = parentOptional! // Kotlift generated smart cast
   let name = node.getName() ?? "THROW IS CURRENTLY NOT SUPPORTED" //throw IllegalArgumentException("name expected")
 
   return "foo returns \(name)"

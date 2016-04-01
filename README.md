@@ -82,11 +82,12 @@ folder. (optional)
 Kotlift uses various regular expressions and a simple structure tree.
 
 For advanced Kotlift usage in your project, modify replacementFile.json to customize
-replacements (such as `.toString() `to `.mySwiftyToStringFunction()`).
+replacements (such as `.toString() `to `.mySwiftyToStringFunction()`). Include the kotlift.swift file 
+in your project for a basic mapping of the most important Kotlin std-lib functions that are different in Swift.
 
 ### Dependencies ###
 
-* Kotlin 1.0.0
+* Kotlin 1.0.1
 
 ### Contribution guidelines ###
 
