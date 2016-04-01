@@ -13,6 +13,9 @@ extension Array {
   func get(index: Int) -> Element {
     return self[index]
   }
+  mutating func clear() {
+    self.removeAll()
+  }
 }
 
 extension Dictionary {
@@ -31,6 +34,9 @@ extension Dictionary {
   mutating func remove(key: Key) -> Value? {
     return self.removeValueForKey(key)
   }
+  mutating func clear() {
+    self.removeAll()
+  }
 }
 
 extension Set {
@@ -45,6 +51,9 @@ extension Set {
   }
   func isEmpty() -> Bool {
     return self.isEmpty
+  }
+  mutating func clear() {
+    self.removeAll()
   }
 }
 
