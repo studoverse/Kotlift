@@ -33,6 +33,7 @@ class Transpiler(val replacements: List<Replacement>) {
     var nextLineForReplacement: String? = null
     var nextConstructor: String? = null
     var simulatedNextSourceLine: String? = null
+    var nextLineAnnotation: String? = null // Annotation for the next line
 
     // Constructor might look like "(let name: String, let admin: Bool = false)"
     fun parseConstructorParams(originalConstructor: String, dataClassName: String?) {
@@ -306,7 +307,7 @@ class Transpiler(val replacements: List<Replacement>) {
 
       // Translate function calls
       if (line.matches(R_FUN)) {
-        val functionName = line.replace(R_FUN, "$6")
+        val functionName = line.replace(R_FUN, "$8")
 
         // Append to classes/interface list
         for (index in structureTree.count() - 1 downTo 0) {
@@ -319,14 +320,21 @@ class Transpiler(val replacements: List<Replacement>) {
           }
         }
 
+        // Annotations
+        val annotation = nextLineAnnotation ?: line.replace(R_FUN, "$2")
+        val throws = if (annotation.startsWith("@Throws")) "throws " else ""
+
         // Generic: fun <T> foo() --> func foo<T>()
-        line = line.replace(R_FUN, "$1$2func $6$5$7")
+        line = line.replace(R_FUN, "$1$4func $8$7$9")
 
         // fun -> func
         line = line.replace("open ", "")
         // Return values
         line = line.replace("):", ") ->")
         line = line.replace(") :", ") ->")
+
+        // Throws
+        line = line.replace(Regex("(.*\\(\\) )(.*)"), "$1$throws$2")
 
         // No swift override-keyword when function is defined by interface
         for (index in structureTree.count() - 1 downTo 0) {
@@ -347,6 +355,13 @@ class Transpiler(val replacements: List<Replacement>) {
         if (line.contains("abstract ")) {
           line = line.replace("abstract ", "") + " {\n    fatalError(\"Method is abstract\")\n  }"
         }
+      }
+
+      // Annotations for the next line
+      nextLineAnnotation = null
+      if (line.matches(Regex("(\\s*)(\\@[A-Za-z0-9]+(\\(.+?\\))*)+"))) {
+        nextLineAnnotation = line.replace(Regex("(\\s*)(\\@[A-Za-z0-9]+(\\(.+?\\))*)+"), "$2")
+        continue // Keep annotation for next line, but do not print current line
       }
 
 
@@ -430,10 +445,9 @@ class Transpiler(val replacements: List<Replacement>) {
         } else if (line.contains(" = ")) {
           // var x = a() --> var x = let a()
           line = line.replace(" = ", " = try ")
-
         } else {
           // x() --> try x()
-          line = line.replace(Regex("(\\s*)(.*)"), "$1try $2")
+          line = line.replace(Regex("(\\s*)(.*)"), "$1") + "try " + line.replace(Regex("(\\s*)(.*)"), "$2")
         }
       }
 
@@ -621,7 +635,7 @@ class Transpiler(val replacements: List<Replacement>) {
     val DEBUG = false
 
     val R_CLASS = Regex("(\\s*)((open |data |abstract |private |protected |internal |public |)*)class ([A-Za-z0-9_]+)(<.+?>|)(\\([^\\)]*\\)|)( ?(.*)) \\{")
-    val R_FUN = Regex("(\\s*)((open |override |abstract |private |protected |internal |public |)*)fun( |(<.+?>))+([A-Za-z0-9_<>.]+)(\\(.*\\).*)")
+    val R_FUN = Regex("(\\s*)(\\@[A-Za-z0-9]+(\\(.+?\\))* )*((open |override |abstract |private |protected |internal |public |)*)fun( |(<.+?>))+([A-Za-z0-9_<>.]+)(\\(.*\\).*)")
   }
 
 }

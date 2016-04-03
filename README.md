@@ -33,6 +33,7 @@ The following language features are currently transpiled, but some edge cases mi
 * Custom rewrites (comment the preceding line with `// SWIFT: this.will(be.replaced)` to replace the following line)
 * Null safety, safe calls, null coalescing
 * Basic try-catch
+* @Throws annotation / throws
 * Casting
 * Ranges and iteration
 * When / switch case
