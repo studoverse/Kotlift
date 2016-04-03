@@ -322,7 +322,7 @@ class Transpiler(val replacements: List<Replacement>) {
 
         // Annotations
         val annotation = nextLineAnnotation ?: line.replace(R_FUN, "$2")
-        val throws = if (annotation.startsWith("@Throws")) "throws " else ""
+        val throws = if (annotation.startsWith("@Throws")) " throws" else ""
 
         // Generic: fun <T> foo() --> func foo<T>()
         line = line.replace(R_FUN, "$1$4func $8$7$9")
@@ -334,7 +334,10 @@ class Transpiler(val replacements: List<Replacement>) {
         line = line.replace(") :", ") ->")
 
         // Throws
-        line = line.replace(Regex("(.*\\(\\) )(.*)"), "$1$throws$2")
+        if (throws.isNotEmpty()) {
+          val functionNameEnd = line.lastIndexOf(')')
+          line = line.substring(0, functionNameEnd + 1) + throws + line.substring(functionNameEnd + 1)
+        }
 
         // No swift override-keyword when function is defined by interface
         for (index in structureTree.count() - 1 downTo 0) {
