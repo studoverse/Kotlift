@@ -136,7 +136,7 @@ class Transpiler(val replacements: List<Replacement>) {
       // Build structure tree
 
       // Make sure all classes end with {}
-      if (line.matches(Regex("(.* |)class .*")) && !line.endsWith("{")) {
+      if (line.matches(Regex("(.* |)class .*")) && !line.endsWith("{") && !line.endsWith("}")) {
         line += " {"
         simulatedNextSourceLine = "}"
       }
@@ -458,6 +458,12 @@ class Transpiler(val replacements: List<Replacement>) {
       }
 
 
+      // Enums
+      if (line.matches(Regex("(\\s*)enum class (.*)"))) {
+        line = line.replace((Regex("(\\s*)enum class (.*) \\{(.*)")), "$1enum $2 { case$3")
+      }
+
+
       // Classes
       // Declaration
       if (line.matches(R_CLASS)) {
@@ -506,8 +512,8 @@ class Transpiler(val replacements: List<Replacement>) {
             }
           }
         }
-
       }
+
       // Constructor
       if (line.matches(Regex("(\\s*)(override |)init \\{")) || line.matches(Regex("(\\s*)(override |)init \\{.*}"))) {
         // TODO @V Decide if all arguments must be labeled or should be unlabeled (external name = "_")
@@ -646,6 +652,7 @@ class Class(var constructorWritten: Boolean = false, var parentClass: String? = 
 class Function : StructureTree()
 class Block : StructureTree()
 class SwitchCase : StructureTree()
+class Enum : StructureTree()
 open class AddLine(val lineToInsert: String, val nextLine: Boolean = false) : StructureTree()
 class ComputedProperty : AddLine("}", nextLine = true)
 class CompanionObject : StructureTree()
