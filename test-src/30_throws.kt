@@ -24,7 +24,7 @@ fun main(args: Array<String>) {
     bar()
     var x = fooReturns()
     val y = barReturns()
-  } catch (Exception: e) {
+  } catch (e: Exception) {
     println("Success")
   }
 }

@@ -34,6 +34,7 @@ class Transpiler(val replacements: List<Replacement>) {
     var nextConstructor: String? = null
     var simulatedNextSourceLine: String? = null
     var nextLineAnnotation: String? = null // Annotation for the next line
+    var nullCoalescingCount = 0 // Avoid multiple variable names on null coalescing rewrites
 
     // Constructor might look like "(let name: String, let admin: Bool = false)"
     fun parseConstructorParams(originalConstructor: String, dataClassName: String?) {
@@ -591,6 +592,21 @@ class Transpiler(val replacements: List<Replacement>) {
 
       // Null coalescing: ?: --> ??
       line = line.replace(" ?: ", " ?? ")
+
+      // Null coalescing: ?: --> ?! (when right hand side throws)
+      while (line.matches(Regex("(.*) = (try .*) \\?\\? (throw .*)"))) {
+        line = line.replace(Regex("(.*) = (try .*) \\?\\? (throw .*)"), "$1 = $2 ?! { $3 }")
+      }
+      while (line.matches(Regex("(.*) = (.*) \\?\\? (throw .*)"))) {
+        line = line.replace(Regex("(.*) = (.*) \\?\\? (throw .*)"), "$1 = try $2 ?! { $3 }")
+      }
+
+      // Null coalescing: ?: --> let;if;let (when right hand side is "continue")
+      while (line.matches(Regex("(\\s*)(var |let |)([A-Za-z0-9]*) = (.*) \\?\\? continue(( .*)|)"))) {
+        nullCoalescingCount++
+        line = line.replace(Regex("(\\s*)(var |let |)([A-Za-z0-9]*) = (.*) \\?\\? continue(( .*)|)"),
+            "$1let _kotliftOptional$nullCoalescingCount = $4; if _kotliftOptional$nullCoalescingCount == nil { continue }; $2$3 = _kotliftOptional$nullCoalescingCount!$5")
+      }
 
       // Return null on elvis operator with smart cast
       if (line.matches(Regex("(\\s*)(let |var |)([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"))) {

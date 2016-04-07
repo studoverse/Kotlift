@@ -189,3 +189,15 @@ func != (a: Int, b: Int64) -> Bool {
 func != (a: Int64, b: Int) -> Bool {
   return Int64(b) != a
 }
+
+// Nil Coalescing Operator for use with statements. E.g. try a ?! { throw Error() }
+infix operator ?! { associativity right precedence 131 }
+public func ?! <T> (optional: Optional<T>, throwsStatement: () throws -> Void) rethrows -> T {
+  switch optional {
+  case .Some(let value):
+    return value
+  case .None:
+    try throwsStatement()
+    return optional! // This line will never be executed when thowsStatement actually throws
+  }
+}

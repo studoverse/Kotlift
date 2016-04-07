@@ -3,6 +3,7 @@
   {"from":"val", "to":"let"},
   {"from":"null", "to":"nil"},
   {"from":"this", "to":"self"},
+  {"from":"Unit", "to":"Void"},
   {"from":"Boolean", "to":"Bool"},
   {"from":"Float", "to":"Double"},
   {"from":"Long", "to":"Int64"},
