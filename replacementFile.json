@@ -15,6 +15,7 @@
   {"from":"interface", "to":"protocol"},
   {"from":"get\\(\\)", "to":"get"},
   {"from":"protected", "to":"internal"},
-  {"from":"Collection", "to":"Array"}
+  {"from":"Collection", "to":"Array"},
+  {"from":".invoke", "to":""}
   // END - DO NOT MODIFY THIS SECTION
 ]

@@ -257,11 +257,11 @@ class Transpiler(val replacements: List<Replacement>) {
 
       // Translate Maps --> [:]
       line = line.replace("LinkedHashMap", "HashMap").replace("ArrayMap", "HashMap")
-      while (line.matches(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.*),(.*)>\\(\\)(.*)"))) {
-        line = line.replace(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.*),(.*)>\\(\\)(.*)"), "$1[$3:$4]()$5")
+      while (line.matches(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.+?),(.+?)>\\(\\)(.*)"))) {
+        line = line.replace(Regex("(.*)(emptyMap|HashMap|LinkedHashMap)<(.+?),(.+?)>\\(\\)(.*)"), "$1[$3:$4]()$5")
       }
-      while (line.matches(Regex("(.*)Map<(.*),(.*)>(.*)"))) {
-        line = line.replace(Regex("(.*)Map<(.*),(.*)>(.*)"), "$1[$2:$3]$4")
+      while (line.matches(Regex("(.*)Map<(.+?),(.+?)>(.*)"))) {
+        line = line.replace(Regex("(.*)Map<(.+?),(.+?)>(.*)"), "$1[$2:$3]$4")
       }
       while (line.matches(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"))) {
         val pairList = line.replace(Regex("(.*)(hashMap|mutableMap|linkedMap|map)Of\\((.*)\\)(.*)"), "$3")
@@ -532,8 +532,8 @@ class Transpiler(val replacements: List<Replacement>) {
 
 
       // Named arguments: name = x --> name: x
-      while (line.matches(Regex("(.*[A-Z][A-Za-z0-9_]*)(<.*>|)\\((.*?)([A-Za-z0-9_]+) = (.*)\\)(.*)"))) {
-        line = line.replace(Regex("(.*[A-Z][A-Za-z0-9_]*)(<.*>|)\\((.*?)([A-Za-z0-9_]+) = (.*)\\)(.*)"), "$1$2($3$4: $5)$6")
+      while (line.matches(Regex("(.*[A-Za-z0-9_]*)(<.*>|)\\((.*?)([A-Za-z0-9_]+) = (.*)\\)(.*)"))) {
+        line = line.replace(Regex("(.*[A-Za-z0-9_]*)(<.*>|)\\((.*?)([A-Za-z0-9_]+) = (.*)\\)(.*)"), "$1$2($3$4: $5)$6")
       }
 
 
@@ -601,25 +601,12 @@ class Transpiler(val replacements: List<Replacement>) {
         line = line.replace(Regex("(.*) = (.*) \\?\\? (throw .*)"), "$1 = try $2 ?! { $3 }")
       }
 
-      // Null coalescing: ?: --> let;if;let (when right hand side is "continue")
-      while (line.matches(Regex("(\\s*)(var |let |)([A-Za-z0-9]*) = (.*) \\?\\? continue(( .*)|)"))) {
+      // Null coalescing: ?: --> let;if;let (when right hand side is "continue|return"). Auto smart cast
+      while (line.matches(Regex("(\\s*)(var |let |)([A-Za-z0-9]*) = (.*) \\?\\? (continue|return [^\\/]*)(.*)"))) {
         nullCoalescingCount++
-        line = line.replace(Regex("(\\s*)(var |let |)([A-Za-z0-9]*) = (.*) \\?\\? continue(( .*)|)"),
-            "$1let _kotliftOptional$nullCoalescingCount = $4; if _kotliftOptional$nullCoalescingCount == nil { continue }; $2$3 = _kotliftOptional$nullCoalescingCount!$5")
+        line = line.replace(Regex("(\\s*)(var |let |)([A-Za-z0-9]*) = (.*) \\?\\? (continue|return [^\\/]*)(.*)"),
+            "$1let _kotliftOptional$nullCoalescingCount = $4; if _kotliftOptional$nullCoalescingCount == nil { $5 }; $2$3 = _kotliftOptional$nullCoalescingCount!$6")
       }
-
-      // Return null on elvis operator with smart cast
-      if (line.matches(Regex("(\\s*)(let |var |)([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.]*)"))) {
-        val indent = line.replace(Regex("(\\s*)(let |var |)([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.\\/\\)]*)"), "$1")
-        val keyword = line.replace(Regex("(\\s*)(let |var |)([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.\\/\\)]*)"), "$2")
-        val nullVar = line.replace(Regex("(\\s*)(let |var |)([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.\\/\\)]*)"), "$3")
-        val returnVal = line.replace(Regex("(\\s*)(let |var |)([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.\\/\\)]*)"), "$5")
-        line = line.replace(Regex("(\\s*)(let |var )([A-Za-z0-9_]*) = (.*) \\?\\? return ([A-Za-z0-9_\\.\\/\\)]*)"), "$1let $3Optional = $4 ?? nil")
-        // Add return statement
-        nextOutputLine = "${indent}if ${nullVar}Optional == nil { return $returnVal } // Kotlift generated return from elvis operator\n" +
-            "$indent$keyword$nullVar = ${nullVar}Optional! // Kotlift generated smart cast"
-      }
-
 
       // Smart casts on if-null-checks: if (x != null) --> if let x = x
       if (line.matches(Regex("(\\s*)if ([A-Za-z_][A-Za-z0-9_]*) != nil \\{"))) {
