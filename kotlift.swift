@@ -1,5 +1,9 @@
 import Foundation
 
+enum KotlinErrors: ErrorType {
+  case NumberFormatException
+}
+
 extension Array {
   var size: Int { return self.count }
   mutating func add(element: Element) {
@@ -78,6 +82,20 @@ extension String {
   }
   func isEmpty() -> Bool {
     return isEmpty
+  }
+  func toInt() throws -> Int {
+    if let integerValue = Int(self) {
+      return integerValue
+    } else {
+      throw KotlinErrors.NumberFormatException
+    }
+  }
+  func toFloat() throws -> Float {
+    if let floatValue = Float(self) {
+      return floatValue
+    } else {
+      throw KotlinErrors.NumberFormatException
+    }
   }
 }
 
