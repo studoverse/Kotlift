@@ -79,6 +79,9 @@ extension String {
   func isEmpty() -> Bool {
     return isEmpty
   }
+  func split(p: String) -> [String] {
+    return self.componentsSeparatedByString(p)
+  }
 }
 
 enum Exception: ErrorType {
