@@ -81,6 +81,19 @@ extension String {
   }
 }
 
+protocol _StringType { }
+extension String: _StringType { }
+extension Array where Element: _StringType {
+  func joinToString(separator separator: String = "") -> String {
+    var retval = ""
+    for rawObject in self {
+      let element = rawObject as! String
+      retval += separator + element
+    }
+    return retval
+  }
+}
+
 enum Exception: ErrorType {
   case NumberFormat
 }
