@@ -232,8 +232,16 @@ class Transpiler(val replacements: List<Replacement>) {
       // Replacements
       replacements.forEach {
         val regex = Regex("(.*[^A-Za-z0-9_]|)${it.from}([^A-Za-z0-9_].*|\\Z)")
-        while (line.matches(regex)) {
-          line = line.replace(regex, "$1${it.to}$2")
+        if (it.multiple) {
+          while (line.matches(regex)) {
+            // Replace as much as possible
+            line = line.replace(regex, "$1${it.to}$2")
+          }
+        } else {
+          if (line.matches(regex)) {
+            // Replace only once
+            line = line.replace(regex, "$1${it.to}$2")
+          }
         }
       }
 

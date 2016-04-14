@@ -6,7 +6,7 @@ import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.*
 
-data class Replacement(val from: String, val to: String)
+data class Replacement(val from: String, val to: String, val multiple: Boolean)
 
 fun main(args: Array<String>) {
   if (args.count() < 3 || args.count() > 4) {
@@ -21,11 +21,16 @@ fun main(args: Array<String>) {
 
   // Replacement array
   val replacements: List<Replacement> = loadReplacementList((Paths.get(args[2]).toFile()))
+  if (replacements.isEmpty()) {
+    println("replacementFile empty: ${Paths.get(args[2]).toFile().absoluteFile}")
+    return
+  }
 
   val sourceFiles = ArrayList<File>()
   val destinationFiles = ArrayList<File>()
   listFiles(sourcePath, sourceFiles, ".kt")
 
+  println(replacements)
   println(sourceFiles)
 
   val transpiler = Transpiler(replacements)
@@ -103,13 +108,15 @@ fun loadReplacementList(file: File): List<Replacement> {
   val lines = Files.readAllLines(Paths.get(file.path), Charsets.UTF_8)
   val list = LinkedList<Replacement>()
 
-  val replacementRegex = Regex("\\s*\\{\\\"from\\\":\\\"(.*)\\\", \\\"to\\\":\\\"(.*)\\\"\\}.*")
+  val replacementRegex = Regex("\\s*\\{\\s*\\\"from\\\":\\s*\\\"(.*)\\\",\\s*\\\"to\\\":\\s*\\\"(.*)\\\",\\s*\\\"multiple\\\":\\s*\\\"?(true|false)\\\"?\\s*\\},?\\s*")
 
   // Simple json parser
   for (line in lines) {
     if (line.matches(replacementRegex)) {
-      list.add(Replacement(line.replace(replacementRegex, "$1").replace("\\\"", "\"").replace("\\\\", "\\"),
-          line.replace(replacementRegex, "$2").replace("\\\\", "\\")))
+      list.add(Replacement(
+          line.replace(replacementRegex, "$1").replace("\\\"", "\"").replace("\\\\", "\\"),
+          line.replace(replacementRegex, "$2").replace("\\\\", "\\"),
+          line.replace(replacementRegex, "$3").equals("true")))
     }
   }
 

@@ -1,21 +1,90 @@
 [
   // START - DO NOT MODIFY THIS SECTION
-  {"from":"val", "to":"let"},
-  {"from":"null", "to":"nil"},
-  {"from":"this", "to":"self"},
-  {"from":"Unit", "to":"Void"},
-  {"from":"Boolean", "to":"Bool"},
-  {"from":"Float", "to":"Double"},
-  {"from":"Long", "to":"Int64"},
-  {"from":"Int", "to":"Int32"},
-  {"from":"Short", "to":"Int16"},
-  {"from":"Byte", "to":"Int8"},
-  {"from":"println", "to":"print"},
-  {"from":"print\\(\\)", "to":"print(\"\")"},
-  {"from":"interface", "to":"protocol"},
-  {"from":"get\\(\\)", "to":"get"},
-  {"from":"protected", "to":"internal"},
-  {"from":"Collection", "to":"Array"},
-  {"from":".invoke", "to":""}
+  // When multiple is false, the string will only be replaced once per line
+  {
+    "from": "val",
+    "to": "let",
+    "multiple": true
+  },
+  {
+    "from": "null",
+    "to": "nil",
+    "multiple": true
+  },
+  {
+    "from": "this",
+    "to": "self",
+    "multiple": true
+  },
+  {
+    "from": "Unit",
+    "to": "Void",
+    "multiple": true
+  },
+  {
+    "from": "Boolean",
+    "to": "Bool",
+    "multiple": true
+  },
+  {
+    "from": "Float",
+    "to": "Double",
+    "multiple": true
+  },
+  {
+    "from": "Long",
+    "to": "Int64",
+    "multiple": true
+  },
+  {
+    "from": "Int",
+    "to": "Int32",
+    "multiple": true
+  },
+  {
+    "from": "Short",
+    "to": "Int16",
+    "multiple": true
+  },
+  {
+    "from": "Byte",
+    "to": "Int8",
+    "multiple": true
+  },
+  {
+    "from": "println",
+    "to": "print",
+    "multiple": true
+  },
+  {
+    "from": "print\\(\\)",
+    "to": "print(\"\")",
+    "multiple": true
+  },
+  {
+    "from": "interface",
+    "to": "protocol",
+    "multiple": true
+  },
+  {
+    "from": "get\\(\\)",
+    "to": "get",
+    "multiple": true
+  },
+  {
+    "from": "protected",
+    "to": "internal",
+    "multiple": true
+  },
+  {
+    "from": "Collection",
+    "to": "Array",
+    "multiple": true
+  },
+  {
+    "from": ".invoke",
+    "to": "",
+    "multiple": true
+  }
   // END - DO NOT MODIFY THIS SECTION
 ]
