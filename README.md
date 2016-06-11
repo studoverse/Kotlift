@@ -14,9 +14,6 @@ valid.
 All framework interfacing code from Android or iOS/Cocoa is not supported.
 Many functions from the Kotlin stdlib are the same in Swift, therefore less logic has to be rewritten.
 
-Kotlift is already used in production by [Moshbit App Design & Development](http://moshbit.com) and will be updated to
-new Kotlin and Swift versions.
-
 Supported versions: Kotlin 1.0.1, Swift 2.2
 
 ### Supported features ###
