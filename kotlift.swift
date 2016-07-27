@@ -89,9 +89,15 @@ extension String: _StringType { }
 extension Array where Element: _StringType {
   func joinToString(separator separator: String = "") -> String {
     var retval = ""
+    var first = true
     for rawObject in self {
       let element = rawObject as! String
-      retval += separator + element
+      if (first) {
+        retval += element
+      } else {
+        retval += separator + element
+      }
+      first = false
     }
     return retval
   }
