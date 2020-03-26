@@ -56,7 +56,7 @@ fun main(args: Array<String>) {
     val destPath = Paths.get(file.path.replace(sourcePath, destinationPath).replace(".kt", ".swift"))
     destinationFiles.add(destPath.toFile())
 
-    val parentDir=destPath.parent.toFile()
+    val parentDir = destPath.parent.toFile()
     if(!parentDir.exists())
       parentDir.mkdirs();
     Files.write(destPath, destLines, Charsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
