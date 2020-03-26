@@ -57,8 +57,9 @@ fun main(args: Array<String>) {
     destinationFiles.add(destPath.toFile())
 
     val parentDir = destPath.parent.toFile()
-    if(!parentDir.exists())
-      parentDir.mkdirs();
+    if(!parentDir.exists()) {
+      parentDir.mkdirs()
+    } 
     Files.write(destPath, destLines, Charsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
   }
 
