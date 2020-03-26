@@ -22,12 +22,12 @@ func main(args: [String]) {
   var b: String? = "abc"
   b = nil // ok
 
-  print("a.length = \(a.length) (should be 3)")
+  print("a.length: \(a.length) (should be 3)")
 
   //let blInvalid = b.length // error: variable 'b' can be nil
 
   let bl = b != nil ? b!.length : -1
-  print("bl = \(bl) (should be -1)")
+  print("bl: \(bl) (should be -1)")
 
   if b != nil && b!.length > 0 {
     print("ERROR: String of length \(b!.length)")

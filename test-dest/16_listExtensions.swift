@@ -48,12 +48,12 @@ func main(args: [String]) {
   list.add(11.858502)
   list.add(3.1415)
   let avg1 = list.avg()
-  print("avg1 = \(avg1) (should be 10.0)")
+  print("avg1: \(avg1) (should be 10.0)")
 
   var list2 = [Double]()
   list2.add(15.0)
   list2.add(5.0)
-  print("avg2 = \(list2.avg()) (should be 10.0)")
+  print("avg2: \(list2.avg()) (should be 10.0)")
 
   var people = [Person]()
   people.add(Person(name: "Steve", age: 14))
