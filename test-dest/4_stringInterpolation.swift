@@ -6,8 +6,8 @@ func main(args: [String]) {
     let name = "Bob"
     var name2 = "Dan"
     print("Hello, \(name)!")
-    print("true = \(true)")
-    print("false = \(1 == 2)")
+    print("true: \(true)")
+    print("false: \(1 == 2)")
     print("function call: \(x())")
     print("my name is \(name) :)")
     print("multiple: \(name), \(name2) \(name2)")

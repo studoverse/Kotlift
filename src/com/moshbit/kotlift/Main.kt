@@ -5,6 +5,9 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.*
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 
 data class Replacement(val from: String, val to: String, val multiple: Boolean)
 
@@ -53,6 +56,9 @@ fun main(args: Array<String>) {
     val destPath = Paths.get(file.path.replace(sourcePath, destinationPath).replace(".kt", ".swift"))
     destinationFiles.add(destPath.toFile())
 
+    val parentDir=destPath.parent.toFile()
+    if(!parentDir.exists())
+      parentDir.mkdirs();
     Files.write(destPath, destLines, Charsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
   }
 
@@ -105,22 +111,9 @@ fun main(args: Array<String>) {
 
 // A very simple json parser. Could also be implemented with jackson json parser, but omitted to reduce dependencies.
 fun loadReplacementList(file: File): List<Replacement> {
-  val lines = Files.readAllLines(Paths.get(file.path), Charsets.UTF_8)
-  val list = LinkedList<Replacement>()
-
-  val replacementRegex = Regex("\\s*\\{\\s*\\\"from\\\":\\s*\\\"(.*)\\\",\\s*\\\"to\\\":\\s*\\\"(.*)\\\",\\s*\\\"multiple\\\":\\s*\\\"?(true|false)\\\"?\\s*\\},?\\s*")
-
-  // Simple json parser
-  for (line in lines) {
-    if (line.matches(replacementRegex)) {
-      list.add(Replacement(
-          line.replace(replacementRegex, "$1").replace("\\\"", "\"").replace("\\\\", "\\"),
-          line.replace(replacementRegex, "$2").replace("\\\\", "\\"),
-          line.replace(replacementRegex, "$3").equals("true")))
-    }
-  }
-
-  return list
+  val mapper = ObjectMapper().registerModule(KotlinModule())
+  val result: List<Replacement> = mapper.readValue(file);
+  return result;
 }
 
 fun validateError(fileName: String, hint: String) {

@@ -1,0 +1,29 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+}
+
+plugins {
+  id 'java'
+  id 'org.jetbrains.kotlin.jvm' version '1.3.61'
+}
+
+repositories {
+  mavenCentral()
+}
+
+sourceSets {
+  main.kotlin.srcDirs += 'src'
+}
+
+group 'com.moshbit'
+
+compileKotlin {
+  kotlinOptions.jvmTarget = "1.8"
+}
+
+dependencies {
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+  implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.10.+"
+}

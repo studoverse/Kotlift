@@ -1,6 +1,4 @@
 [
-  // START - DO NOT MODIFY THIS SECTION
-  // When multiple is false, the string will only be replaced once per line
   {
     "from": "val",
     "to": "let",
@@ -86,5 +84,4 @@
     "to": "",
     "multiple": true
   }
-  // END - DO NOT MODIFY THIS SECTION
 ]
