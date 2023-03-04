@@ -1,3 +1,6 @@
+# This library is deprecated #
+Kotlift is deprecated in favour of [Kotlin Multiplatform Mobile](https://kotlinlang.org/lp/mobile/).
+
 # Kotlift #
 
 ![Kotlift: The first source-to-source language transpiler from Kotlin to Swift](banner.png)
